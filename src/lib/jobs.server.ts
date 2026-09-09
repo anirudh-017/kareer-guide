@@ -1,7 +1,9 @@
 import { DEFAULT_COUNTRY, countryCodeFor } from "./countries";
 import type { Job } from "./types";
 
-const TIMEOUT = 8000;
+// Adzuna answers in ~6.3s and supplies most of the results, so an 8s budget
+// dropped it whenever the other twelve sources loaded the event loop.
+const TIMEOUT = 15000;
 
 function withTimeout<T>(p: Promise<T>, fallback: T): Promise<T> {
   return Promise.race([
