@@ -130,13 +130,18 @@ function Recommendations() {
     navigator.geolocation.getCurrentPosition(async (pos) => {
       try {
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`,
+          // accept-language matters: without it Nominatim answers in the local
+          // script, and a Kannada place name matches no job listing on earth.
+          `https://nominatim.openstreetmap.org/reverse?format=json&accept-language=en&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`,
         );
         const data = (await res.json()) as { address?: NominatimAddress };
         const a = data.address ?? {};
-        setLocation(
-          [a.city ?? a.town ?? a.state_district ?? a.state, a.country].filter(Boolean).join(", "),
-        );
+        // Keep the state alongside the locality. Outside a city Nominatim falls
+        // through to the district — "Rangareddy" — which appears in no listing,
+        // so the filter matched nothing and a 30-result search rendered empty.
+        // "Rangareddy, Telangana, India" still carries a token boards do use.
+        const locality = a.city ?? a.town ?? a.state_district;
+        setLocation([locality, a.state, a.country].filter(Boolean).join(", "));
       } catch {
         toast.error("Could not detect your location");
       }

@@ -97,3 +97,33 @@ describe("typeOf", () => {
     expect(typeOf(job({ jobType: "part-time internship" }))).toBe("internship");
   });
 });
+
+describe("matchesLocation with a detected location", () => {
+  /*
+   * From a live report: geolocation outside a city centre gave Nominatim no
+   * city or town, so it fell through to the district and answered in the local
+   * script — "ರಂಗಾರೆಡ್ಡಿ, India". The search returned 30 results and the page
+   * rendered "0 jobs found", because no listing names that district and the
+   * tokenizer deleted the non-Latin word entirely.
+   */
+  it("keeps a non-Latin word as a token instead of deleting it", () => {
+    expect(matchesLocation("ರಂಗಾರೆಡ್ಡಿ campus", "ರಂಗಾರೆಡ್ಡಿ, India")).toBe(true);
+    // The old [^a-z0-9] split reduced that filter to ["india"], which matches
+    // nothing, since boards write "Hyderabad, Telangana" and never "India".
+    expect(matchesLocation("Hyderabad, Telangana", "India")).toBe(false);
+  });
+
+  it("matches once the state travels with the district", () => {
+    // What detectLocation now produces for the same coordinates.
+    const filter = "Rangareddy, Telangana, India";
+    expect(matchesLocation("Hyderabad, Telangana", filter)).toBe(true);
+    expect(matchesLocation("Secunderabad, Telangana", filter)).toBe(true);
+    expect(matchesLocation("Remote", filter)).toBe(true);
+  });
+
+  it("still narrows to the region the user is in", () => {
+    const filter = "Rangareddy, Telangana, India";
+    expect(matchesLocation("Berlin, Germany", filter)).toBe(false);
+    expect(matchesLocation("Bangalore, Karnataka", filter)).toBe(false);
+  });
+});

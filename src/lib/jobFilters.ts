@@ -43,9 +43,16 @@ const REMOTE = /\b(remote|anywhere|worldwide)\b/;
  */
 export function matchesLocation(jobLocation: string, filter: string): boolean {
   const where = jobLocation.toLowerCase();
+  // Split on any non-alphanumeric character, Unicode-aware. The old [^a-z0-9]
+  // class treated every non-Latin character as a separator, so a place name in
+  // a local script deleted itself rather than becoming a token.
+  //
+  // \p{M} matters as much as \p{L}: Indic scripts carry vowel signs and viramas
+  // as combining marks, so letters alone still shatter ರಂಗಾರೆಡ್ಡಿ into single
+  // characters that the length filter then discards.
   const tokens = filter
     .toLowerCase()
-    .split(/[^a-z0-9]+/)
+    .split(/[^\p{L}\p{M}\p{N}]+/u)
     .filter((t) => t.length > 2);
   if (!tokens.length) return true;
   if (REMOTE.test(where)) return true;
