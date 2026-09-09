@@ -14,6 +14,7 @@ import {
   Target,
 } from "lucide-react";
 import { Footer } from "@/components/Footer";
+import { CollaborationIllustration } from "@/components/illustrations";
 import { Nav } from "@/components/Nav";
 import { Reveal } from "@/components/Reveal";
 import { seo } from "@/lib/seo";
@@ -78,9 +79,8 @@ function Home() {
             </h1>
           </div>
           <div className="home-intro-aside">
-            <p>
-              Structured roadmaps, company benchmarks, and live job matching.
-            </p>
+            <CollaborationIllustration className="home-hero-art" />
+            <p>Structured roadmaps, company benchmarks, and live job matching.</p>
             <div className="intro-meta">
               <Globe2 size={15} aria-hidden="true" />
               <span>Built for India • Free • Zero Sign-up</span>
@@ -119,7 +119,8 @@ function Home() {
             </div>
 
             <p className="tool-description">
-              Curated learning paths, milestone projects, and exportable PDF roadmaps for any target role.
+              Curated learning paths, milestone projects, and exportable PDF roadmaps for any target
+              role.
             </p>
 
             {/* Quick role pills */}
@@ -308,9 +309,7 @@ function Home() {
             <div>
               <RouteIcon size={23} strokeWidth={1.4} aria-hidden="true" />
               <h2>Structured Roadmaps</h2>
-              <p>
-                Step-by-step milestone curriculum with curated, paywall-free resources.
-              </p>
+              <p>Step-by-step milestone curriculum with curated, paywall-free resources.</p>
             </div>
             <div>
               <Target size={23} strokeWidth={1.4} aria-hidden="true" />
@@ -322,9 +321,7 @@ function Home() {
             <div>
               <Check size={23} strokeWidth={1.4} aria-hidden="true" />
               <h2>Zero Sign-Up</h2>
-              <p>
-                100% free and private. No accounts, passwords, or data tracking required.
-              </p>
+              <p>100% free and private. No accounts, passwords, or data tracking required.</p>
             </div>
           </div>
         </Reveal>

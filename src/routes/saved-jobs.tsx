@@ -2,6 +2,7 @@ import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, Bookmark, ExternalLink, Trash2 } from "lucide-react";
 import { useEffect, useState, type CSSProperties } from "react";
 
+import { SavedIllustration } from "@/components/illustrations";
 import { Page } from "@/components/Page";
 import { seo } from "@/lib/seo";
 import { getSavedJobs, removeJob } from "@/lib/savedJobs";
@@ -59,6 +60,7 @@ function SavedJobsPage() {
 
   return (
     <Page
+      art={<SavedIllustration />}
       title="Keep your options open."
       intro="Your shortlisted roles and tailored resumes, saved in this browser on this device."
     >

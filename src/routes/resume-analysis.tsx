@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { ResumeIllustration } from "@/components/illustrations";
 import { Page } from "@/components/Page";
 import { ScoreCard } from "@/components/ScoreCard";
 import { seo } from "@/lib/seo";
@@ -112,13 +113,17 @@ function AnalysisPage() {
 
   if (!a)
     return (
-      <Page title="Resume Analysis">
+      <Page art={<ResumeIllustration />} title="Resume Analysis">
         <p className="text-sm text-muted-foreground">No analysis yet — start from Tailor Resume.</p>
       </Page>
     );
 
   return (
-    <Page title="Analysis Review" intro="Approve what you want applied, then generate the rewrite.">
+    <Page
+      art={<ResumeIllustration />}
+      title="Analysis Review"
+      intro="Approve what you want applied, then generate the rewrite."
+    >
       <div className="grid gap-4 md:grid-cols-2">
         <ScoreCard label="RESUME SCORE" value={a.score} />
         <ScoreCard label="JD FIT SCORE" value={a.fitScore} />

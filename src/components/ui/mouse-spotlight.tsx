@@ -68,12 +68,7 @@ export function MouseSpotlight() {
   if (!enabled) return null;
 
   return (
-    <div
-      ref={glowRef}
-      aria-hidden="true"
-      className="cursor-ambient-glow"
-      style={{ opacity: 0 }}
-    />
+    <div ref={glowRef} aria-hidden="true" className="cursor-ambient-glow" style={{ opacity: 0 }} />
   );
 }
 

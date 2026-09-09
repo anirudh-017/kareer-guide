@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, Check, Loader2, Search, Sparkles, Upload, X } fr
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
+import { DreamJobIllustration } from "@/components/illustrations";
 import { Page } from "@/components/Page";
 import { seo } from "@/lib/seo";
 import { analyzeDreamJob, parseDreamResume } from "@/lib/dream.functions";
@@ -295,6 +296,7 @@ function DreamJobWizard() {
 
   return (
     <Page
+      art={<DreamJobIllustration />}
       title="Dream Job"
       intro="Tell us where you want to work and what you know today. We compare the two and map the gap."
     >

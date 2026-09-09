@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { SavedIllustration } from "@/components/illustrations";
 import { Page } from "@/components/Page";
 import { seo } from "@/lib/seo";
 import { getDreamJobs, removeDreamJob, roadmapProgress } from "@/lib/dreamJobs";
@@ -43,6 +44,7 @@ function DreamHistory() {
 
   return (
     <Page
+      art={<SavedIllustration />}
       title="My Dream Jobs"
       intro="Kept on this device only. Update your skills, re-analyze, and watch the match climb."
     >
@@ -64,7 +66,7 @@ function DreamHistory() {
                 <div className="mt-3 flex items-center gap-4">
                   <p
                     className="text-4xl font-black"
-                    style={{ color: job.match.match >= 60 ? "#16a34a" : "#dc2626" }}
+                    style={{ color: job.match.match >= 60 ? "#2e9e6b" : "#dd6a57" }}
                   >
                     {job.match.match}%
                   </p>

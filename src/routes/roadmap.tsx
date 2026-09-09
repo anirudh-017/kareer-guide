@@ -17,6 +17,7 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Footer } from "@/components/Footer";
+import { RoadmapIllustration } from "@/components/illustrations";
 import { Nav } from "@/components/Nav";
 import { DottedField } from "@/components/ui/dotted-field";
 import { Reveal } from "@/components/Reveal";
@@ -64,9 +65,9 @@ const POPULAR_PROFESSIONS = [
 
 /** Difficulty reads at a glance, so it carries colour rather than just text. */
 const DIFFICULTY_STYLE: Record<Difficulty, string> = {
-  Beginner: "#16a34a",
-  Intermediate: "#ca8a04",
-  Advanced: "#dc2626",
+  Beginner: "#2e9e6b",
+  Intermediate: "#e0a100",
+  Advanced: "#dd6a57",
 };
 
 function DifficultyPill({ level }: { level: Difficulty }) {
@@ -146,11 +147,18 @@ function RoadmapPage() {
           Back to Kareer Guide
         </Link>
 
-        <h1 className="mt-8 text-4xl font-black tracking-tight md:text-5xl">Know How to Start</h1>
-        <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
-          Enter your dream profession and get a comprehensive learning roadmap with topics,
-          projects, tools, and resources.
-        </p>
+        <div className="page-heading-art mt-8">
+          <div className="page-heading-copy">
+            <h1 className="text-4xl font-black tracking-tight md:text-5xl">Know How to Start</h1>
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
+              Enter your dream profession and get a comprehensive learning roadmap with topics,
+              projects, tools, and resources.
+            </p>
+          </div>
+          <div className="page-art">
+            <RoadmapIllustration />
+          </div>
+        </div>
 
         <input
           className="input-brutal mt-10 px-5 py-4 text-base"
