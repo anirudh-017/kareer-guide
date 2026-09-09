@@ -4,7 +4,6 @@ import { ArrowRight, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import { ResumeIllustration } from "@/components/illustrations";
 import { Page } from "@/components/Page";
 import { ResumeUpload } from "@/components/ResumeUpload";
 import { WorkflowAside } from "@/components/WorkflowAside";
@@ -168,7 +167,6 @@ function TailorResume() {
 
   return (
     <Page
-      art={<ResumeIllustration />}
       title="Your resume, refined."
       intro="A focused review for the role you want. Bring out your strengths, improve the fit, and keep every fact true."
     >

@@ -17,9 +17,7 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Footer } from "@/components/Footer";
-import { RoadmapIllustration } from "@/components/illustrations";
 import { Nav } from "@/components/Nav";
-import { DottedField } from "@/components/ui/dotted-field";
 import { Reveal } from "@/components/Reveal";
 import { seo } from "@/lib/seo";
 import { generateRoadmap } from "@/lib/jobsy.functions";
@@ -65,9 +63,9 @@ const POPULAR_PROFESSIONS = [
 
 /** Difficulty reads at a glance, so it carries colour rather than just text. */
 const DIFFICULTY_STYLE: Record<Difficulty, string> = {
-  Beginner: "#2e9e6b",
-  Intermediate: "#e0a100",
-  Advanced: "#dd6a57",
+  Beginner: "#2f6f52",
+  Intermediate: "#8a6a1f",
+  Advanced: "#8c3a2b",
 };
 
 function DifficultyPill({ level }: { level: Difficulty }) {
@@ -136,7 +134,6 @@ function RoadmapPage() {
 
   return (
     <div className="relative min-h-screen bg-background text-foreground">
-      <DottedField />
       <Nav />
       <main className="relative z-10 mx-auto w-full max-w-[60rem] px-6 pb-24 pt-28 md:pt-36">
         <Link
@@ -147,18 +144,11 @@ function RoadmapPage() {
           Back to Kareer Guide
         </Link>
 
-        <div className="page-heading-art mt-8">
-          <div className="page-heading-copy">
-            <h1 className="text-4xl font-black tracking-tight md:text-5xl">Know How to Start</h1>
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
-              Enter your dream profession and get a comprehensive learning roadmap with topics,
-              projects, tools, and resources.
-            </p>
-          </div>
-          <div className="page-art">
-            <RoadmapIllustration />
-          </div>
-        </div>
+        <h1 className="portal-title mt-8 text-4xl md:text-5xl">Know How to Start</h1>
+        <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
+          Enter your dream profession and get a comprehensive learning roadmap with topics,
+          projects, tools, and resources.
+        </p>
 
         <input
           className="input-brutal mt-10 px-5 py-4 text-base"

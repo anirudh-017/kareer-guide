@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Download, ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { ResumeIllustration } from "@/components/illustrations";
 import { Page } from "@/components/Page";
 import { ScoreCard } from "@/components/ScoreCard";
 import { seo } from "@/lib/seo";
@@ -67,7 +66,7 @@ function TailoredResume() {
 
   if (!r)
     return (
-      <Page art={<ResumeIllustration />} title="Tailored Resume">
+      <Page title="Tailored Resume">
         <p className="text-sm text-muted-foreground">
           Nothing here yet — start from Tailor Resume.
         </p>
@@ -75,11 +74,7 @@ function TailoredResume() {
     );
 
   return (
-    <Page
-      art={<ResumeIllustration />}
-      title="Tailored Resume"
-      intro="Rewritten for the role, scored, and ready to send."
-    >
+    <Page title="Tailored Resume" intro="Rewritten for the role, scored, and ready to send.">
       <div className="grid gap-4 md:grid-cols-2">
         <ScoreCard label="RESUME SCORE" value={r.score} />
         <ScoreCard label="JD FIT SCORE" value={r.fitScore} />

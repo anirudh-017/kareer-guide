@@ -12,7 +12,6 @@ import { useEffect, type ReactNode } from "react";
 
 import { Toaster } from "@/components/ui/sonner";
 import { OG_IMAGE, SITE_URL } from "@/lib/seo";
-import { MouseSpotlight } from "@/components/ui/mouse-spotlight";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -98,7 +97,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: OG_IMAGE },
       { name: "robots", content: "index, follow" },
-      { name: "theme-color", content: "#263238" },
+      { name: "theme-color", content: "#0c1212" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -108,9 +107,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Manrope:wght@400;450;500;550;600;650;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap",
       },
+      // .ico first for old browsers, then the SVG that modern ones prefer —
+      // it stays sharp at every tab and bookmark size from one 400-byte file.
       { rel: "icon", href: "/favicon.ico", sizes: "any" },
-      { rel: "icon", href: "/favicon.png", type: "image/png" },
-      { rel: "apple-touch-icon", href: "/logo-icon.png" },
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "icon", href: "/favicon.png", type: "image/png", sizes: "32x32" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
     ],
     scripts: [
       {
@@ -189,11 +191,6 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="site-bg" aria-hidden="true">
-        <div className="site-bg-image" />
-        <div className="site-bg-overlay" />
-      </div>
-      <MouseSpotlight />
       <div key={pathname} className="page-transition-wrapper">
         <Outlet />
       </div>

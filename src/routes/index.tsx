@@ -1,22 +1,9 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import {
-  ArrowRight,
-  ArrowUpRight,
-  Bookmark,
-  Briefcase,
-  Check,
-  CheckCircle2,
-  Compass,
-  FileCheck2,
-  Globe2,
-  Route as RouteIcon,
-  Sparkles,
-  Target,
-} from "lucide-react";
+import { ArrowRight, Bookmark, Check, FileCheck2, Route as RouteIcon, Target } from "lucide-react";
 import { Footer } from "@/components/Footer";
-import { CollaborationIllustration } from "@/components/illustrations";
 import { Nav } from "@/components/Nav";
 import { Reveal } from "@/components/Reveal";
+import GlyphPortal from "@/components/ui/glyph-portal";
 import { seo } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
@@ -38,293 +25,130 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-const POPULAR_ROLES = [
-  "Frontend",
-  "Full Stack",
-  "AI / ML",
-  "DevOps",
-  "Data Science",
-  "Product Manager",
-];
+/**
+ * The three tools, rendered inside the portal's green interior. They are the
+ * payoff for scrolling through the word, so they carry the real links rather
+ * than repeating as a second card grid further down the page.
+ */
+const TOOLS = [
+  {
+    no: "01",
+    to: "/roadmap",
+    title: "Career roadmaps",
+    copy: "A target role in, a phased learning path out — topics, projects, real resources, and a milestone that proves each phase is done.",
+  },
+  {
+    no: "02",
+    to: "/dream-job",
+    title: "Dream job gap analysis",
+    copy: "Benchmark what you have against the hiring bar at the company you actually want, then work the gap it finds.",
+  },
+  {
+    no: "03",
+    to: "/recommendations",
+    title: "Live job match",
+    copy: "Your resume read for skills, then matched against openings pulled live from a dozen boards.",
+  },
+] as const;
 
 function Home() {
-  const handleCardMove = (e: React.PointerEvent<HTMLElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    e.currentTarget.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
-    e.currentTarget.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`);
-  };
-
-  const handleCardLeave = (e: React.PointerEvent<HTMLElement>) => {
-    e.currentTarget.style.setProperty("--mouse-x", "-999px");
-    e.currentTarget.style.setProperty("--mouse-y", "-999px");
-  };
-
   return (
     <div className="site-shell">
       <Nav />
-      <main id="main-content" className="home-main" tabIndex={-1}>
-        {/* Intro Banner */}
-        <section className="home-intro page-enter" aria-labelledby="home-title">
-          <div>
-            <p className="eyebrow">
-              <span className="eyebrow-icon">
-                <Compass size={14} aria-hidden="true" />
-              </span>
-              AI Career Platform
-            </p>
-            <h1 id="home-title">
-              Clear direction.
-              <br />
-              <span className="headline-secondary">For your career.</span>
+      <main id="main-content" tabIndex={-1}>
+        <GlyphPortal
+          className="portal-hero"
+          word="KAREER"
+          scrollLength={2.4}
+          enterLabel="Show me the path"
+          fontWeight={900}
+          front={
+            <>
+              <p className="portal-eyebrow">You already know where you want to end up.</p>
+              <p className="portal-support">This is the part in between.</p>
+              <span className="portal-scroll">Free, no sign-up — scroll to begin ↓</span>
+            </>
+          }
+        >
+          <div className="portal-copy portal-on-field">
+            <h1>
+              A roadmap to the role, an honest read on the gap, and the jobs that are open right
+              now.
             </h1>
-          </div>
-          <div className="home-intro-aside">
-            <CollaborationIllustration className="home-hero-art" />
-            <p>Structured roadmaps, company benchmarks, and live job matching.</p>
-            <div className="intro-meta">
-              <Globe2 size={15} aria-hidden="true" />
-              <span>Built for India • Free • Zero Sign-up</span>
-            </div>
-          </div>
-        </section>
-
-        {/* ---------------------------------------------------------------- */}
-        {/* CARDS: ROADMAP (PRIMARY) + DREAM JOB + JOB MATCH                 */}
-        {/* ---------------------------------------------------------------- */}
-        <section aria-label="Career tools" className="tool-grid">
-          {/* 01: CAREER ROADMAP - PRIMARY HERO FUNCTION */}
-          <Link
-            to="/roadmap"
-            className="tool-card tool-roadmap page-enter"
-            onPointerMove={handleCardMove}
-            onPointerLeave={handleCardLeave}
-          >
-            <div className="tool-topline">
-              <span className="tool-tag">
-                <Sparkles size={14} aria-hidden="true" />
-                Step-by-Step
-              </span>
-              <span className="tool-number">01 / ROADMAP</span>
-            </div>
-
-            <div className="match-heading">
-              <h2>
-                AI Career
-                <br />
-                Roadmaps.
-              </h2>
-              <div className="tool-icon match-icon">
-                <RouteIcon strokeWidth={1.5} aria-hidden="true" />
-              </div>
-            </div>
-
-            <p className="tool-description">
-              Curated learning paths, milestone projects, and exportable PDF roadmaps for any target
-              role.
-            </p>
-
-            {/* Quick role pills */}
-            <div className="role-pills">
-              {POPULAR_ROLES.map((r) => (
-                <span key={r} className="role-pill">
-                  {r}
-                </span>
+            <div className="portal-features">
+              {TOOLS.map((tool) => (
+                <Link key={tool.no} to={tool.to} className="portal-feature portal-feature-link">
+                  <h3>
+                    <span className="portal-no">{tool.no}</span>
+                    {tool.title}
+                  </h3>
+                  <p>{tool.copy}</p>
+                  <span className="portal-feature-cta">
+                    Open <ArrowRight size={15} aria-hidden="true" />
+                  </span>
+                </Link>
               ))}
             </div>
+          </div>
+        </GlyphPortal>
 
-            <div className="feature-bullets">
-              <div className="feature-bullet">
-                <CheckCircle2 size={14} aria-hidden="true" />
-                <span>Free courses & official documentation</span>
-              </div>
-              <div className="feature-bullet">
-                <CheckCircle2 size={14} aria-hidden="true" />
-                <span>Portfolio milestone projects</span>
-              </div>
-              <div className="feature-bullet">
-                <CheckCircle2 size={14} aria-hidden="true" />
-                <span>Instant PDF progress export</span>
-              </div>
+        <div className="home-main">
+          <Reveal>
+            <div className="grid gap-4 md:grid-cols-2">
+              <Link to="/tailor-resume" className="saved-strip">
+                <span className="saved-icon">
+                  <FileCheck2 size={20} strokeWidth={1.5} aria-hidden="true" />
+                </span>
+                <div>
+                  <h2>ATS Resume Studio</h2>
+                  <p>Pinpoint keyword gaps and optimize bullets for target job descriptions.</p>
+                </div>
+                <span className="inline-link">
+                  Tailor resume <ArrowRight size={16} aria-hidden="true" />
+                </span>
+              </Link>
+
+              <Link to="/saved-jobs" className="saved-strip">
+                <span className="saved-icon">
+                  <Bookmark size={20} strokeWidth={1.5} aria-hidden="true" />
+                </span>
+                <div>
+                  <h2>Saved Items</h2>
+                  <p>Access your bookmarked openings, company checks, and learning roadmaps.</p>
+                </div>
+                <span className="inline-link">
+                  View saved <ArrowRight size={16} aria-hidden="true" />
+                </span>
+              </Link>
             </div>
+          </Reveal>
 
-            <div className="tool-bottom">
-              <span className="card-cta">
-                Build roadmap <ArrowUpRight size={20} aria-hidden="true" />
-              </span>
-              <span className="tool-hint">Free • All Levels</span>
+          <Reveal className="approach-section">
+            <div className="section-caption">
+              <span className="eyebrow">Focused. Fast. Private.</span>
+              <span className="section-line" />
             </div>
-          </Link>
-
-          {/* 02: DREAM JOB GAP ANALYSIS */}
-          <Link
-            to="/dream-job"
-            className="tool-card tool-dream page-enter"
-            onPointerMove={handleCardMove}
-            onPointerLeave={handleCardLeave}
-          >
-            <div className="tool-topline">
-              <span className="tool-tag">
-                <Target size={14} aria-hidden="true" />
-                Benchmark
-              </span>
-              <span className="tool-number">02 / DREAM JOB</span>
-            </div>
-
-            <div>
-              <h2>
-                Target companies.
-                <br />
-                Bridge the gap.
-              </h2>
-              <p className="tool-description">
-                Benchmark your skills directly against hiring bars at 50+ top tech companies.
-              </p>
-            </div>
-
-            <div className="feature-bullets">
-              <div className="feature-bullet">
-                <CheckCircle2 size={14} aria-hidden="true" />
-                <span>50+ top company hiring profiles</span>
-              </div>
-              <div className="feature-bullet">
-                <CheckCircle2 size={14} aria-hidden="true" />
-                <span>Instant skill gap analysis</span>
-              </div>
-              <div className="feature-bullet">
-                <CheckCircle2 size={14} aria-hidden="true" />
-                <span>30-60-90 day action plan</span>
-              </div>
-            </div>
-
-            <div className="tool-bottom">
-              <span className="text-cta">Check eligibility</span>
-              <span className="card-arrow">
-                <ArrowUpRight size={21} aria-hidden="true" />
-              </span>
-            </div>
-          </Link>
-
-          {/* 03: LIVE JOB MATCH */}
-          <Link
-            to="/recommendations"
-            className="tool-card tool-match page-enter"
-            onPointerMove={handleCardMove}
-            onPointerLeave={handleCardLeave}
-          >
-            <div className="tool-topline">
-              <span className="tool-tag">
-                <Briefcase size={14} aria-hidden="true" />
-                Live Openings
-              </span>
-              <span className="tool-number">03 / LIVE MATCH</span>
-            </div>
-
-            <div>
-              <h2>
-                Match skills.
-                <br />
-                Zero ghost jobs.
-              </h2>
-              <p className="tool-description">
-                Scan 13+ verified job boards for live postings matched to your resume or skills.
-              </p>
-            </div>
-
-            <div className="feature-bullets">
-              <div className="feature-bullet">
-                <CheckCircle2 size={14} aria-hidden="true" />
-                <span>13+ verified job boards</span>
-              </div>
-              <div className="feature-bullet">
-                <CheckCircle2 size={14} aria-hidden="true" />
-                <span>Postings under 10 days active</span>
-              </div>
-              <div className="feature-bullet">
-                <CheckCircle2 size={14} aria-hidden="true" />
-                <span>Deep semantic relevance match</span>
-              </div>
-            </div>
-
-            <div className="tool-bottom">
-              <span className="text-cta">Find matching jobs</span>
-              <span className="card-arrow">
-                <ArrowUpRight size={21} aria-hidden="true" />
-              </span>
-            </div>
-          </Link>
-        </section>
-
-        {/* ---------------------------------------------------------------- */}
-        {/* RESUME STUDIO & SAVED JOBS FEATURE STRIPS                        */}
-        {/* ---------------------------------------------------------------- */}
-        <Reveal>
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            {/* Resume Studio Banner */}
-            <Link
-              to="/tailor-resume"
-              className="saved-strip"
-              onPointerMove={handleCardMove}
-              onPointerLeave={handleCardLeave}
-            >
-              <span className="saved-icon">
-                <FileCheck2 size={20} strokeWidth={1.5} aria-hidden="true" />
-              </span>
+            <div className="principles-grid">
               <div>
-                <h2>ATS Resume Studio</h2>
-                <p>Pinpoint keyword gaps and optimize bullets for target job descriptions.</p>
+                <RouteIcon size={23} strokeWidth={1.4} aria-hidden="true" />
+                <h2>Structured Roadmaps</h2>
+                <p>Step-by-step milestone curriculum with curated, paywall-free resources.</p>
               </div>
-              <span className="inline-link">
-                Tailor resume <ArrowRight size={16} aria-hidden="true" />
-              </span>
-            </Link>
-
-            {/* Saved Jobs Banner */}
-            <Link
-              to="/saved-jobs"
-              className="saved-strip"
-              onPointerMove={handleCardMove}
-              onPointerLeave={handleCardLeave}
-            >
-              <span className="saved-icon">
-                <Bookmark size={20} strokeWidth={1.5} aria-hidden="true" />
-              </span>
               <div>
-                <h2>Saved Items</h2>
-                <p>Access your bookmarked openings, company checks, and learning roadmaps.</p>
+                <Target size={23} strokeWidth={1.4} aria-hidden="true" />
+                <h2>Hiring Bar Benchmarks</h2>
+                <p>
+                  Calibrated against actual role requirements from leading tech engineering teams.
+                </p>
               </div>
-              <span className="inline-link">
-                View saved <ArrowRight size={16} aria-hidden="true" />
-              </span>
-            </Link>
-          </div>
-        </Reveal>
-
-        {/* Core Principles */}
-        <Reveal className="approach-section">
-          <div className="section-caption">
-            <span className="eyebrow">Focused. Fast. Private.</span>
-            <span className="section-line" />
-          </div>
-          <div className="principles-grid">
-            <div>
-              <RouteIcon size={23} strokeWidth={1.4} aria-hidden="true" />
-              <h2>Structured Roadmaps</h2>
-              <p>Step-by-step milestone curriculum with curated, paywall-free resources.</p>
+              <div>
+                <Check size={23} strokeWidth={1.4} aria-hidden="true" />
+                <h2>Zero Sign-Up</h2>
+                <p>100% free and private. No accounts, passwords, or data tracking required.</p>
+              </div>
             </div>
-            <div>
-              <Target size={23} strokeWidth={1.4} aria-hidden="true" />
-              <h2>Hiring Bar Benchmarks</h2>
-              <p>
-                Calibrated against actual role requirements from leading tech engineering teams.
-              </p>
-            </div>
-            <div>
-              <Check size={23} strokeWidth={1.4} aria-hidden="true" />
-              <h2>Zero Sign-Up</h2>
-              <p>100% free and private. No accounts, passwords, or data tracking required.</p>
-            </div>
-          </div>
-        </Reveal>
+          </Reveal>
+        </div>
       </main>
       <Footer />
     </div>

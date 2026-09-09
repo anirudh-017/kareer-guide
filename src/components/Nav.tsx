@@ -20,13 +20,8 @@ const LINKS = [
 export function Brand() {
   return (
     <Link to="/" className="brand" aria-label="Kareer Guide home">
-      <img
-        src="/logo-icon.png"
-        alt="Kareer Guide"
-        width="36"
-        height="36"
-        className="brand-logo-img"
-      />
+      {/* The SVG mark rather than a raster: one file, sharp at any density. */}
+      <img src="/favicon.svg" alt="" width="28" height="28" className="brand-mark-img" />
       <span className="brand-name">
         Kareer<span className="brand-light">Guide</span>
         <span className="brand-period">.</span>
@@ -76,6 +71,11 @@ export function Nav() {
         Skip to content
       </a>
       <header className="site-header">
+        {/* Read progress. Driven entirely by the scroll timeline in CSS, so it
+            costs no scroll listener and no re-render. */}
+        <div className="scroll-progress" aria-hidden="true">
+          <span />
+        </div>
         <div className="header-inner">
           <Brand />
           <nav className="desktop-nav" aria-label="Primary">

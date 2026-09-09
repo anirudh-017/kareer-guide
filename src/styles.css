@@ -62,141 +62,130 @@
 }
 
 /*
- * Storyset palette — the flat-illustration system the platform is built on.
+ * Portal palette — paper, ink, and one deep green field.
  *
- * #FFC727 sunburst   the signature yellow: CTAs, highlights, illustration fills
- * #263238 ink        blue-grey 900, every piece of structural darkness
- * #37474F slate      blue-grey 800
- * #455A64 steel      blue-grey 700, secondary text
- * #EBEBEB mist       light grey, the illustrations' neutral fill
- * #DD6A57 coral      the one warm accent, reserved for destructive/alert
+ * Taken from the Glyph Portal reference: the page is white, the type is
+ * near-black, and a single saturated green carries every moment of emphasis.
+ * There is no second accent and no illustration; contrast and whitespace do
+ * the work that colour used to.
  *
- * Yellow is the accent, never the foreground: #FFC727 on white is 1.6:1 and
- * unreadable as text. It carries meaning as a *surface* (with ink on top,
- * 9.4:1) which is exactly how the illustrations use it.
+ * #ffffff paper    the ground, edge to edge
+ * #0c1212 ink      headings and body
+ * #0b3b2a field    the green: primary surfaces, the portal interior
+ * #14573f canopy   the green one step up, for hovers
+ * #fbfbfa chalk    type on green
+ * #71766f moss     secondary text
+ * #d8deda rule     hairlines — the only border weight in the system
  */
 :root {
   color-scheme: light;
-  --radius: 0.875rem;
+  --radius: 0.625rem;
 
-  --sunburst: #ffc727;
-  --marigold: #ffb300;
-  --ink: #263238;
-  --slate: #37474f;
-  --steel: #455a64;
-  --mist: #ebebeb;
-  --fog: #f4f5f6;
-  --coral: #dd6a57;
-  --blush: #f7a9a0;
+  --paper: #ffffff;
+  --ink: #0c1212;
+  --field: #0b3b2a;
+  --canopy: #14573f;
+  --understory: #082d22;
+  --chalk: #fbfbfa;
+  --moss: #71766f;
+  --rule: #d8deda;
 
-  /* Legacy aliases: the 1900 lines below still reference these by name. */
-  --palette-onyx: #263238;
-  --palette-slate: #455a64;
-  --palette-cream: #f4f5f6;
-  --palette-sand: #ffc727;
-  --palette-taupe: #78909c;
-
-  --background: #f4f5f6;
-  --foreground: #263238;
+  --background: #ffffff;
+  --foreground: #0c1212;
   --card: #ffffff;
-  --card-foreground: #263238;
+  --card-foreground: #0c1212;
   --popover: #ffffff;
-  --popover-foreground: #263238;
-  --primary: #263238;
-  --primary-foreground: #ffffff;
-  --secondary: rgba(255, 199, 39, 0.16);
-  --secondary-foreground: #263238;
-  --muted: rgba(69, 90, 100, 0.07);
-  --muted-foreground: #455a64;
-  --accent: #ffc727;
-  --accent-foreground: #263238;
-  --destructive: #dd6a57;
-  --destructive-foreground: #ffffff;
-  --border: rgba(69, 90, 100, 0.16);
-  --input: rgba(69, 90, 100, 0.28);
-  --ring: #ffc727;
-  --chart-1: #ffc727;
-  --chart-2: #455a64;
-  --chart-3: #dd6a57;
-  --chart-4: #78909c;
-  --chart-5: #37474f;
+  --popover-foreground: #0c1212;
+  --primary: #0b3b2a;
+  --primary-foreground: #fbfbfa;
+  --secondary: rgba(11, 59, 42, 0.055);
+  --secondary-foreground: #0b3b2a;
+  --muted: rgba(12, 18, 18, 0.035);
+  --muted-foreground: #71766f;
+  --accent: #0b3b2a;
+  --accent-foreground: #fbfbfa;
+  --destructive: #8c3a2b;
+  --destructive-foreground: #fbfbfa;
+  --border: #d8deda;
+  --input: #c7d0cb;
+  --ring: #176247;
+  --chart-1: #0b3b2a;
+  --chart-2: #447d62;
+  --chart-3: #8c3a2b;
+  --chart-4: #a8b3ad;
+  --chart-5: #14573f;
   --sidebar: #ffffff;
-  --sidebar-foreground: #263238;
-  --sidebar-primary: #263238;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #ffc727;
-  --sidebar-accent-foreground: #263238;
-  --sidebar-border: rgba(69, 90, 100, 0.16);
-  --sidebar-ring: #ffc727;
-  --inkberry: #263238;
-  --citron: #ffc727;
-  --glacier: rgba(255, 199, 39, 0.18);
-  --glacier-ink: #263238;
+  --sidebar-foreground: #0c1212;
+  --sidebar-primary: #0b3b2a;
+  --sidebar-primary-foreground: #fbfbfa;
+  --sidebar-accent: rgba(11, 59, 42, 0.055);
+  --sidebar-accent-foreground: #0b3b2a;
+  --sidebar-border: #d8deda;
+  --sidebar-ring: #176247;
+
+  /* Names the stylesheet body still calls for. */
+  --inkberry: #0c1212;
+  --citron: #0b3b2a;
   --pink: var(--accent);
-  --shadow-color: rgba(38, 50, 56, 0.1);
+
+  --shadow-color: rgba(12, 18, 18, 0.07);
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /*
- * Dark: ink becomes the ground rather than the ink, and yellow steps up to
- * primary — on #1b2429 it reads at 12:1, so it can finally carry text weight.
+ * Dark: the field becomes the paper. Green lightens to #6fbf95 so it can still
+ * carry text — the reference green is 1.4:1 on its own ground and cannot.
  */
 .dark {
   color-scheme: dark;
 
-  --sunburst: #ffc727;
-  --marigold: #ffb300;
-  --ink: #eceff1;
-  --slate: #cfd8dc;
-  --steel: #b0bec5;
-  --mist: #37474f;
-  --fog: #1b2429;
-  --coral: #e88372;
-  --blush: #f7a9a0;
+  --paper: #0a1512;
+  --ink: #fbfbfa;
+  --field: #6fbf95;
+  --canopy: #8ed3ae;
+  --understory: #06120e;
+  --chalk: #06120e;
+  --moss: #93a09a;
+  --rule: rgba(251, 251, 250, 0.13);
 
-  --palette-onyx: #eceff1;
-  --palette-slate: #b0bec5;
-  --palette-cream: #1b2429;
-  --palette-sand: #ffc727;
-  --palette-taupe: #78909c;
+  --background: #0a1512;
+  --foreground: #fbfbfa;
+  --card: #10221b;
+  --card-foreground: #fbfbfa;
+  --popover: #10221b;
+  --popover-foreground: #fbfbfa;
+  --primary: #6fbf95;
+  --primary-foreground: #06120e;
+  --secondary: rgba(111, 191, 149, 0.12);
+  --secondary-foreground: #fbfbfa;
+  --muted: rgba(251, 251, 250, 0.06);
+  --muted-foreground: #93a09a;
+  --accent: #6fbf95;
+  --accent-foreground: #06120e;
+  --destructive: #d08a76;
+  --destructive-foreground: #06120e;
+  --border: rgba(251, 251, 250, 0.13);
+  --input: rgba(251, 251, 250, 0.2);
+  --ring: #6fbf95;
+  --chart-1: #6fbf95;
+  --chart-2: #93a09a;
+  --chart-3: #d08a76;
+  --chart-4: #4d6a5c;
+  --chart-5: #8ed3ae;
+  --sidebar: #10221b;
+  --sidebar-foreground: #fbfbfa;
+  --sidebar-primary: #6fbf95;
+  --sidebar-primary-foreground: #06120e;
+  --sidebar-accent: rgba(111, 191, 149, 0.12);
+  --sidebar-accent-foreground: #fbfbfa;
+  --sidebar-border: rgba(251, 251, 250, 0.13);
+  --sidebar-ring: #6fbf95;
 
-  --background: #1b2429;
-  --foreground: #eceff1;
-  --card: #263238;
-  --card-foreground: #eceff1;
-  --popover: #263238;
-  --popover-foreground: #eceff1;
-  --primary: #ffc727;
-  --primary-foreground: #263238;
-  --secondary: rgba(255, 199, 39, 0.14);
-  --secondary-foreground: #eceff1;
-  --muted: rgba(236, 239, 241, 0.08);
-  --muted-foreground: #b0bec5;
-  --accent: #ffc727;
-  --accent-foreground: #263238;
-  --destructive: #e88372;
-  --destructive-foreground: #1b2429;
-  --border: rgba(236, 239, 241, 0.14);
-  --input: rgba(236, 239, 241, 0.22);
-  --ring: #ffc727;
-  --glacier: rgba(255, 199, 39, 0.12);
-  --glacier-ink: #ffc727;
-  --inkberry: #eceff1;
-  --citron: #ffc727;
-  --chart-1: #ffc727;
-  --chart-2: #b0bec5;
-  --chart-3: #e88372;
-  --chart-4: #78909c;
-  --chart-5: #cfd8dc;
-  --sidebar: #263238;
-  --sidebar-foreground: #eceff1;
-  --sidebar-primary: #ffc727;
-  --sidebar-primary-foreground: #263238;
-  --sidebar-accent: rgba(255, 199, 39, 0.16);
-  --sidebar-accent-foreground: #eceff1;
-  --sidebar-border: rgba(236, 239, 241, 0.14);
-  --sidebar-ring: #ffc727;
-  --shadow-color: rgba(0, 0, 0, 0.45);
+  --inkberry: #fbfbfa;
+  --citron: #6fbf95;
+  --pink: var(--accent);
+
+  --shadow-color: rgba(0, 0, 0, 0.5);
 }
 
 @theme inline {
@@ -360,7 +349,7 @@
 }
 .input-brutal:focus {
   border-color: var(--ring);
-  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 16%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 16%, transparent);
 }
 .input-brutal:disabled {
   opacity: 0.6;
@@ -382,7 +371,7 @@ textarea.input-brutal {
   position: sticky;
   top: 0;
   z-index: 40;
-  background: color-mix(in oklch, var(--background) 88%, transparent);
+  background: color-mix(in srgb, var(--background) 88%, transparent);
   border-bottom: 1px solid var(--border);
   backdrop-filter: blur(20px);
 }
@@ -416,31 +405,23 @@ textarea.input-brutal {
 }
 .brand-light {
   font-weight: 750;
-  color: #ffc727;
-  background: linear-gradient(135deg, #ffc727 0%, #ffb300 100%);
+  color: #0b3b2a;
+  background: linear-gradient(135deg, #0b3b2a 0%, #14573f 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 .brand-period {
-  color: #ffc727;
+  color: #0b3b2a;
 }
 .brand-logo-img {
   width: 38px;
   height: 38px;
   border-radius: 10px;
   object-fit: contain;
-  box-shadow: 0 4px 12px rgba(255, 199, 39, 0.28);
   transition: transform 250ms var(--ease-out), box-shadow 250ms var(--ease-out);
 }
 .brand:hover .brand-logo-img {
   transform: scale(1.06) rotate(1.5deg);
-  box-shadow: 0 6px 18px rgba(255, 199, 39, 0.45);
-}
-.dark .brand-logo-img {
-  box-shadow: 0 4px 16px rgba(255, 179, 0, 0.3);
-}
-.dark .brand:hover .brand-logo-img {
-  box-shadow: 0 6px 22px rgba(255, 179, 0, 0.5);
 }
 .brand-mark {
   display: inline-flex;
@@ -505,26 +486,26 @@ textarea.input-brutal {
 .nav-link[data-active="true"] {
   transform: scale(1.08);
   font-weight: 700;
-  box-shadow: 0 4px 20px -2px rgba(255, 199, 39, 0.4);
+  box-shadow: 0 4px 20px -2px rgba(11, 59, 42, 0.4);
   z-index: 10;
   background: var(--secondary);
   color: var(--foreground);
 }
 /* First 3 Main Tabs: Unified Cohesive Signature Color */
 .nav-link-trio {
-  background: rgba(255, 199, 39, 0.12);
-  border: 1px solid rgba(255, 199, 39, 0.35);
+  background: rgba(11, 59, 42, 0.12);
+  border: 1px solid rgba(11, 59, 42, 0.35);
   color: var(--foreground);
 }
 .nav-link-trio:hover {
-  background: rgba(255, 199, 39, 0.22);
-  border-color: rgba(255, 199, 39, 0.65);
+  background: rgba(11, 59, 42, 0.22);
+  border-color: rgba(11, 59, 42, 0.65);
 }
 .nav-link-trio[data-active="true"] {
-  background: #ffc727 !important;
-  color: #263238 !important;
-  border-color: #ffc727 !important;
-  box-shadow: 0 4px 24px -2px rgba(255, 199, 39, 0.55);
+  background: #0b3b2a !important;
+  color: #0c1212 !important;
+  border-color: #0b3b2a !important;
+  box-shadow: 0 4px 24px -2px rgba(11, 59, 42, 0.55);
 }
 .header-actions {
   display: flex;
@@ -716,7 +697,7 @@ textarea.input-brutal {
   place-items: center;
   width: 52px;
   height: 52px;
-  border: 1px solid color-mix(in oklch, currentColor 20%, transparent);
+  border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
   border-radius: 1rem;
 }
 .tool-icon svg {
@@ -724,24 +705,24 @@ textarea.input-brutal {
 }
 /* Primary Hero Feature: 01 / ROADMAP */
 .tool-roadmap {
-  background: #263238;
+  background: #0c1212;
   color: #f4f5f6;
-  border-color: rgba(255, 199, 39, 0.35);
+  border-color: rgba(11, 59, 42, 0.35);
   animation-delay: 70ms;
 }
 .tool-roadmap .tool-topline {
-  color: #ffc727;
+  color: #0b3b2a;
 }
 .tool-roadmap .tool-tag {
-  color: #ffc727;
-  background: rgba(255, 199, 39, 0.12);
-  border: 1px solid rgba(255, 199, 39, 0.25);
+  color: #0b3b2a;
+  background: rgba(11, 59, 42, 0.12);
+  border: 1px solid rgba(11, 59, 42, 0.25);
   border-radius: 9999px;
   padding: 0.25rem 0.65rem;
   font-weight: 600;
 }
 .tool-roadmap .tool-number {
-  color: #ffc727;
+  color: #0b3b2a;
   opacity: 0.85;
 }
 .tool-roadmap h2 {
@@ -752,7 +733,7 @@ textarea.input-brutal {
   color: #f4f5f6;
 }
 .tool-roadmap h2 span {
-  color: #ffc727;
+  color: #0b3b2a;
 }
 .tool-roadmap .tool-description {
   color: rgba(244, 245, 246, 0.85);
@@ -773,7 +754,7 @@ textarea.input-brutal {
   height: 5.5rem;
   border: 0;
   opacity: 0.45;
-  color: #ffc727;
+  color: #0b3b2a;
   flex-shrink: 0;
 }
 .match-icon svg {
@@ -793,15 +774,15 @@ textarea.input-brutal {
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 550;
-  background: rgba(255, 199, 39, 0.1);
-  color: #ffc727;
-  border: 1px solid rgba(255, 199, 39, 0.22);
+  background: rgba(11, 59, 42, 0.1);
+  color: #0b3b2a;
+  border: 1px solid rgba(11, 59, 42, 0.22);
   transition: background 180ms ease, color 180ms ease, transform 180ms ease;
   cursor: default;
 }
 .role-pill:hover {
-  background: #ffc727;
-  color: #263238;
+  background: #0b3b2a;
+  color: #0c1212;
   transform: translateY(-1px);
 }
 .feature-bullets {
@@ -818,7 +799,7 @@ textarea.input-brutal {
   line-height: 1.45;
 }
 .tool-roadmap .feature-bullet svg {
-  color: #ffc727;
+  color: #0b3b2a;
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -844,13 +825,13 @@ textarea.input-brutal {
   justify-content: space-between;
   gap: 1.25rem;
   padding: 0.8rem 1.35rem;
-  background: #ffc727;
-  color: #263238;
+  background: #0b3b2a;
+  color: #0c1212;
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 700;
   transition: transform 300ms var(--ease-out), background 200ms ease, box-shadow 300ms ease;
-  box-shadow: 0 4px 16px -2px rgba(255, 199, 39, 0.35);
+  box-shadow: 0 4px 16px -2px rgba(11, 59, 42, 0.35);
 }
 .card-cta:hover {
   background: #f4f5f6;
@@ -864,7 +845,7 @@ textarea.input-brutal {
 }
 .tool-hint {
   font-size: 0.75rem;
-  color: rgba(255, 199, 39, 0.75);
+  color: rgba(11, 59, 42, 0.75);
   font-family: var(--font-mono);
 }
 
@@ -875,7 +856,7 @@ textarea.input-brutal {
   animation-delay: 140ms;
 }
 .tool-dream .tool-tag {
-  color: #455a64;
+  color: #71766f;
   background: rgba(69, 90, 100, 0.08);
   border: 1px solid rgba(69, 90, 100, 0.18);
   border-radius: 9999px;
@@ -895,7 +876,7 @@ textarea.input-brutal {
   line-height: 1.6;
 }
 .tool-dream .feature-bullet svg {
-  color: #78909c;
+  color: #a8b3ad;
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -911,7 +892,7 @@ textarea.input-brutal {
   animation-delay: 210ms;
 }
 .tool-match .tool-tag {
-  color: #455a64;
+  color: #71766f;
   background: rgba(69, 90, 100, 0.08);
   border: 1px solid rgba(69, 90, 100, 0.18);
   border-radius: 9999px;
@@ -931,7 +912,7 @@ textarea.input-brutal {
   line-height: 1.6;
 }
 .tool-match .feature-bullet svg {
-  color: #78909c;
+  color: #a8b3ad;
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -954,7 +935,7 @@ textarea.input-brutal {
   flex-shrink: 0;
   border: 1px solid rgba(69, 90, 100, 0.35);
   border-radius: 50%;
-  color: #455a64;
+  color: #71766f;
   transition:
     background 250ms ease,
     color 250ms ease,
@@ -963,9 +944,9 @@ textarea.input-brutal {
 }
 .tool-dream:hover .card-arrow,
 .tool-match:hover .card-arrow {
-  background: #ffc727;
-  border-color: #ffc727;
-  color: #263238;
+  background: #0b3b2a;
+  border-color: #0b3b2a;
+  color: #0c1212;
   transform: translate(2px, -2px);
 }
 .tool-dream:hover .text-cta,
@@ -1811,7 +1792,7 @@ textarea.input-brutal {
   transform: translate(-50%, -50%);
   background: radial-gradient(
     circle,
-    rgba(255, 199, 39, 0.12) 0%,
+    rgba(11, 59, 42, 0.12) 0%,
     rgba(69, 90, 100, 0.06) 45%,
     transparent 70%
   );
@@ -1844,7 +1825,7 @@ textarea.input-brutal {
   padding: 1.5px;
   background: radial-gradient(
     480px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
-    rgba(255, 199, 39, 0.55),
+    rgba(11, 59, 42, 0.55),
     rgba(69, 90, 100, 0.15) 40%,
     transparent 65%
   );
@@ -1863,7 +1844,7 @@ textarea.input-brutal {
 /* First 3 Tool Cards: Cohesive Shared Signature Color Theme */
 .tool-roadmap {
   background: rgba(38, 50, 56, 0.88);
-  border-color: rgba(255, 199, 39, 0.35);
+  border-color: rgba(11, 59, 42, 0.35);
   color: #f4f5f6;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -1871,21 +1852,21 @@ textarea.input-brutal {
 .tool-dream {
   background: rgba(255, 255, 255, 0.88);
   border-color: rgba(69, 90, 100, 0.22);
-  color: #263238;
+  color: #0c1212;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
 .tool-match {
   background: rgba(255, 255, 255, 0.88);
   border-color: rgba(69, 90, 100, 0.22);
-  color: #263238;
+  color: #0c1212;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
 
 .dark .tool-roadmap {
   background: rgba(38, 50, 56, 0.84);
-  border-color: rgba(255, 199, 39, 0.35);
+  border-color: rgba(11, 59, 42, 0.35);
   color: #f4f5f6;
 }
 .dark .tool-dream {
@@ -1916,110 +1897,703 @@ textarea.input-brutal {
   opacity: 0.9;
 }
 
-/* ---------------------------------------------------------------------------
- * Ambient Responsive Website Background (5% Minimal Blur)
- * --------------------------------------------------------------------------- */
-.site-bg {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
+/* ==========================================================================
+ * Portal surface language
+ *
+ * The reference is editorial, not decorative: a serif display face, a sans
+ * body at small sizes, hairline rules instead of shadows, and one green.
+ * These rules land last so they win over the older "brutal" utilities without
+ * those needing to be unpicked rule by rule.
+ * ========================================================================== */
+
+:root {
+  --font-display: Georgia, "Times New Roman", Times, serif;
 }
 
-/* Light Mode: 5% Blur on Perspective Gold Grid */
-.site-bg-image {
-  position: absolute;
-  inset: -8px;
-  background-image: url("/bg-light.jpg");
-  background-position: center center;
-  background-size: cover;
-  background-repeat: no-repeat;
-  filter: blur(1.5px) grayscale(1) brightness(1.06) contrast(0.92);
-  transform: scale(1.01);
-  opacity: 0.35;
-  transition: opacity 0.35s ease, filter 0.35s ease, background-image 0.35s ease;
+/* --- display type --------------------------------------------------------- */
+
+.home-intro h1,
+.page-heading h1,
+.portal-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+.home-intro h1 {
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  margin-top: 1.75rem;
+}
+.page-heading h1 {
+  font-size: clamp(2.25rem, 4.4vw, 3.5rem);
+  font-weight: 400;
+}
+.headline-secondary {
+  color: var(--moss);
+}
+.tool-card h2,
+.match-heading h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
 }
 
-.site-bg-overlay {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    circle at 45% 30%,
-    rgba(255, 199, 39, 0.07) 0%,
-    rgba(244, 245, 246, 0.55) 55%,
-    rgba(244, 245, 246, 0.9) 100%
-  );
-  transition: background 0.35s ease;
+/* Body copy sits small and quiet, the way the reference reads. */
+.page-intro,
+.tool-description,
+.home-intro-aside > p {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--moss);
+}
+.eyebrow,
+.label {
+  font-size: 0.6875rem;
+  letter-spacing: 0.09em;
+  color: var(--moss);
+}
+.eyebrow-icon {
+  display: none;
 }
 
-/* Dark Mode: 5% Blur on 3D Glowing Cubes */
-.dark .site-bg-image {
-  background-image: url("/bg-cubes.jpg");
-  background-position: center center;
-  filter: blur(1.5px) grayscale(1) brightness(0.5) contrast(1.05);
-  transform: scale(1.01);
-  opacity: 0.4;
+/* --- surfaces: hairlines, never shadows ---------------------------------- */
+
+.card-brutal,
+.tool-card {
+  border: 1px solid var(--rule);
+  border-radius: 0.625rem;
+  box-shadow: none;
+  background: var(--card);
+}
+.tool-card:hover {
+  border-color: var(--field);
+}
+.dark .tool-card:hover {
+  border-color: var(--field);
 }
 
-.dark .site-bg-overlay {
-  background: radial-gradient(
-    circle at 50% 25%,
-    rgba(27, 36, 41, 0.35) 0%,
-    rgba(27, 36, 41, 0.75) 55%,
-    rgba(27, 36, 41, 0.95) 100%
-  );
+/* --- controls ------------------------------------------------------------- */
+
+.btn-brutal,
+.button-primary {
+  min-height: 2.875rem;
+  border-radius: 0.625rem;
+  border: 1px solid var(--rule);
+  background: var(--card);
+  color: var(--foreground);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  box-shadow: none;
+}
+.btn-brutal:hover:not(:disabled) {
+  border-color: var(--field);
+}
+.btn-brutal.bg-foreground,
+.btn-brutal.w-full,
+.button-primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+}
+.btn-brutal.bg-foreground:hover:not(:disabled),
+.btn-brutal.w-full:hover:not(:disabled),
+.button-primary:hover:not(:disabled) {
+  background: var(--canopy);
+  border-color: var(--canopy);
+}
+.input-brutal {
+  border-radius: 0.625rem;
+  border-color: var(--rule);
+}
+.input-brutal:focus {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 14%, transparent);
 }
 
+/* --- the numbered list, straight from the reference ---------------------- */
 
-/* ------------------------------------------------------------------ */
-/* Storyset illustrations                                              */
-/*                                                                     */
-/* The art is decorative: it sits beside the heading on wide screens   */
-/* and is removed from the flow entirely below 900px, where vertical   */
-/* space is worth more than atmosphere.                                */
-/* ------------------------------------------------------------------ */
-.page-heading-art {
+.portal-features {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 0.62fr);
-  gap: clamp(1.5rem, 4vw, 3.5rem);
-  align-items: center;
-}
-.page-heading-copy {
-  min-width: 0;
-}
-.page-art {
-  min-width: 0;
-  justify-self: end;
+  grid-template-columns: 1fr;
+  gap: 1.75rem;
   width: 100%;
-  max-width: 21rem;
 }
-.page-art svg {
-  width: 100%;
-  height: auto;
-  display: block;
+.portal-feature {
+  border-top: 1px solid var(--rule);
+  padding-top: 1.1rem;
 }
-.home-hero-art {
-  width: 100%;
-  max-width: 20rem;
-  height: auto;
-  display: block;
-  margin-bottom: 1.5rem;
+.portal-feature h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.2;
 }
-/* A soft yellow wash behind the art so it reads as one object with the page. */
-.page-art,
-.home-hero-art {
-  filter: drop-shadow(0 18px 32px var(--shadow-color));
+.portal-feature p {
+  margin: 0.55rem 0 0;
+  color: var(--moss);
+  font-size: 0.9375rem;
+  line-height: 1.55;
 }
-@media (max-width: 900px) {
-  .page-heading-art {
-    grid-template-columns: minmax(0, 1fr);
+.portal-no {
+  display: inline-block;
+  margin-right: 0.7rem;
+  color: var(--moss);
+  font: 500 0.75rem var(--font-mono);
+  letter-spacing: 0.08em;
+  transform: translateY(-0.1em);
+}
+@media (min-width: 768px) {
+  .portal-features {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3.5rem;
   }
-  .page-art {
+}
+
+/* On the green, the same list inverts. */
+.portal-on-field .portal-feature {
+  border-top-color: rgba(251, 251, 250, 0.22);
+}
+.portal-on-field .portal-feature p,
+.portal-on-field .portal-no {
+  color: rgba(251, 251, 250, 0.85);
+}
+
+/* --- header ---------------------------------------------------------------- */
+
+.site-header {
+  background: color-mix(in srgb, var(--background) 92%, transparent);
+  border-bottom: 1px solid var(--rule);
+}
+.brand-light {
+  color: var(--field);
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  font-weight: 600;
+}
+.brand-period {
+  color: var(--field);
+}
+
+/* --- the portal hero ------------------------------------------------------ */
+
+/*
+ * Bind the component's own four variables to the app's tokens so the portal
+ * follows light/dark with everything else. It ships with a hard-coded green;
+ * these keep one palette in one place.
+ */
+.portal-hero {
+  --gp-paper: var(--background);
+  --gp-ink: var(--foreground);
+  --gp-field: #0b3b2a;
+  --gp-foreground: #fbfbfa;
+  font-family: var(--font-sans);
+}
+.dark .portal-hero {
+  --gp-field: #06231a;
+}
+/* The sticky site header sits above the pinned frame; keep the word clear of it. */
+.portal-hero [data-gp-caption] {
+  inset: calc(var(--gp-word-bottom, 50%) + 74px) 24px auto;
+  justify-content: center;
+  font-family: var(--font-sans);
+}
+.portal-hero [data-gp-hint] {
+  display: none;
+}
+.portal-hero [data-gp-enter] {
+  min-height: 46px;
+  padding: 0 20px;
+  gap: 28px;
+  border: 1px solid #10261d;
+  border-radius: 0.625rem;
+  background: #142b22;
+  color: #fff;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: background 0.18s;
+}
+.portal-hero [data-gp-enter]:hover {
+  background: #204434;
+}
+.portal-hero [data-gp-select] {
+  border-color: var(--rule);
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--moss);
+}
+.portal-hero [data-gp-content] {
+  padding: 5.5rem clamp(1.25rem, 5vw, 5rem) 6.5rem;
+  font-family: var(--font-sans);
+}
+
+.portal-eyebrow {
+  position: absolute;
+  inset: auto 24px calc(100% - var(--gp-word-top, 35%) + 30px);
+  margin: 0;
+  text-align: center;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--moss);
+}
+.portal-support {
+  position: absolute;
+  inset: calc(var(--gp-word-bottom, 50%) + 28px) 24px auto;
+  margin: 0;
+  text-align: center;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--moss);
+}
+.portal-scroll {
+  position: absolute;
+  inset: auto 24px 7%;
+  text-align: center;
+  font-size: 0.6875rem;
+  letter-spacing: 0.01em;
+  color: var(--moss);
+}
+
+.portal-copy {
+  display: flex;
+  width: min(100%, 80rem);
+  margin: auto;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(2rem, 5svh, 3.5rem);
+}
+.portal-copy h1 {
+  max-width: 48rem;
+  margin: 0;
+  color: inherit;
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 1.1rem + 2.1vw, 2.5rem);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.portal-feature-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.18s;
+}
+.portal-feature-link:hover {
+  border-top-color: rgba(251, 251, 250, 0.6);
+}
+.portal-feature-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.9rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #fbfbfa;
+}
+
+@media (max-width: 640px) {
+  .portal-eyebrow {
+    font-size: 0.75rem;
+  }
+  .portal-support {
+    font-size: 0.875rem;
+  }
+  .portal-scroll {
     display: none;
   }
-  .home-hero-art {
-    max-width: 15rem;
-    margin: 0 auto 1.25rem;
+}
+
+/* --- navigation ----------------------------------------------------------- */
+
+/*
+ * The reference nav is quiet: no bounce, no glow, no tinted pill for every
+ * item. Only the current page is filled, and it is filled with the green.
+ */
+.nav-link {
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+.nav-link:hover,
+.nav-link:active {
+  transform: none;
+  color: var(--foreground);
+  background: var(--secondary);
+}
+.nav-link[data-active="true"],
+.nav-link-trio[data-active="true"] {
+  transform: none;
+  box-shadow: none;
+  font-weight: 500;
+  background: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  border-color: var(--primary) !important;
+}
+.nav-link-trio {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--muted-foreground);
+}
+.nav-link-trio:hover {
+  background: var(--secondary);
+  border-color: transparent;
+}
+
+/* --- dark-mode portal ------------------------------------------------------
+ * On a near-black page the reference green is only 1.4:1 against the ground,
+ * so the word disappears. Lift the field until the letters read.
+ */
+.dark .portal-hero {
+  --gp-field: #1f6b4b;
+  --gp-foreground: #fbfbfa;
+}
+.dark .portal-hero [data-gp-enter] {
+  background: #0d3325;
+  border-color: #17513a;
+}
+
+/* --- header, rebuilt ------------------------------------------------------
+ *
+ * The reference header is a wordmark on the left and quiet text on the right,
+ * on plain paper with one hairline under it. Everything the old header added —
+ * a floating translucent capsule, a blurred tint, a glowing raster logo, a
+ * bouncing scale on hover — is removed rather than recoloured.
+ */
+.site-header {
+  background: var(--background);
+  border-bottom: 1px solid var(--rule);
+  backdrop-filter: none;
+}
+.header-inner {
+  min-height: 68px;
+  padding: 0 clamp(1.25rem, 4vw, 2.5rem);
+  gap: 1.5rem;
+}
+
+.brand {
+  gap: 0;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.045em;
+}
+.brand-name {
+  font-weight: 600;
+  letter-spacing: -0.045em;
+}
+.brand-light {
+  font-weight: 600;
+  color: inherit;
+  background: none;
+  -webkit-text-fill-color: currentColor;
+}
+.brand-period {
+  color: var(--field);
+}
+
+/* The capsule goes; the links stand on the paper. */
+.desktop-nav {
+  gap: 0.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  backdrop-filter: none;
+}
+.nav-link,
+.nav-link-trio {
+  padding: 0.4rem 0.7rem;
+  border: 0;
+  border-radius: 0;
+  background: none !important;
+  font-size: 0.8125rem;
+  font-weight: 450;
+  letter-spacing: 0;
+  color: var(--moss);
+  transition: color 0.16s ease;
+}
+.nav-link:hover,
+.nav-link-trio:hover {
+  transform: none;
+  background: none !important;
+  color: var(--foreground);
+}
+/* The current page is marked with a rule under it, not a filled pill. */
+.nav-link[data-active="true"],
+.nav-link-trio[data-active="true"] {
+  transform: none;
+  box-shadow: none;
+  background: none !important;
+  color: var(--foreground) !important;
+  font-weight: 550;
+}
+.nav-link[data-active="true"]::after {
+  content: "";
+  position: absolute;
+  left: 0.7rem;
+  right: 0.7rem;
+  bottom: -0.35rem;
+  height: 1.5px;
+  background: var(--field);
+}
+
+.theme-toggle {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--rule);
+  background: none;
+}
+.theme-toggle:hover {
+  border-color: var(--field);
+  transform: none;
+}
+.header-actions {
+  gap: 0.5rem;
+}
+
+/* The wordmark's mark. Flat, no glow — it is the same square as the favicon. */
+.brand {
+  gap: 0.55rem;
+}
+.brand-mark-img {
+  width: 26px;
+  height: 26px;
+  display: block;
+  border-radius: 6px;
+}
+
+/* --- glass navigation ------------------------------------------------------
+ *
+ * The bar and the pill rail are both translucent and blurred, so page content
+ * scrolling underneath tints them instead of disappearing behind a flat block.
+ *
+ * Three layers make it read as glass rather than as a grey box: a blur with a
+ * little saturation lift (colour behind stays colour), a one-pixel inset
+ * highlight along the top edge, and a soft drop shadow that lifts the rail off
+ * the bar. Every value is a token, so it follows the theme.
+ */
+.site-header {
+  background: color-mix(in srgb, var(--background) 82%, transparent);
+  backdrop-filter: blur(20px) saturate(170%);
+  -webkit-backdrop-filter: blur(20px) saturate(170%);
+  border-bottom: 1px solid color-mix(in srgb, var(--rule) 75%, transparent);
+}
+
+.desktop-nav {
+  gap: 0.3rem;
+  padding: 0.3rem 0.4rem;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--card) 52%, transparent);
+  border: 1px solid color-mix(in srgb, var(--rule) 90%, transparent);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 1px 2px rgba(12, 18, 18, 0.04),
+    0 10px 26px -10px rgba(12, 18, 18, 0.16);
+}
+.dark .desktop-nav {
+  background: color-mix(in srgb, var(--card) 42%, transparent);
+  border-color: rgba(251, 251, 250, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(251, 251, 250, 0.08),
+    0 10px 30px -12px rgba(0, 0, 0, 0.7);
+}
+
+/* The pills themselves: a hairline ring on the glass, filled only when current. */
+.nav-link,
+.nav-link-trio {
+  padding: 0.44rem 0.95rem;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  background: none !important;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--moss);
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease;
+}
+.nav-link-trio {
+  border-color: color-mix(in srgb, var(--field) 32%, transparent);
+}
+.nav-link:hover,
+.nav-link-trio:hover {
+  transform: none;
+  color: var(--foreground);
+  background: color-mix(in srgb, var(--field) 9%, transparent) !important;
+  border-color: color-mix(in srgb, var(--field) 45%, transparent);
+}
+.nav-link[data-active="true"],
+.nav-link-trio[data-active="true"] {
+  transform: none;
+  font-weight: 600;
+  color: var(--primary-foreground) !important;
+  background: var(--primary) !important;
+  border-color: var(--primary);
+  box-shadow: 0 1px 3px rgba(12, 18, 18, 0.18);
+}
+/* The underline marker belonged to the flat bar; the fill replaces it. */
+.nav-link[data-active="true"]::after {
+  content: none;
+}
+
+.theme-toggle {
+  background: color-mix(in srgb, var(--card) 52%, transparent) !important;
+  border-color: color-mix(in srgb, var(--rule) 90%, transparent);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.dark .theme-toggle {
+  background: color-mix(in srgb, var(--card) 42%, transparent) !important;
+  border-color: rgba(251, 251, 250, 0.12);
+  box-shadow: inset 0 1px 0 rgba(251, 251, 250, 0.08);
+}
+.theme-toggle:hover {
+  border-color: color-mix(in srgb, var(--field) 50%, transparent);
+}
+
+/*
+ * Without backdrop-filter (older Firefox, and anything with the effect
+ * disabled) a translucent bar would let text collide with text. Go opaque.
+ */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .site-header {
+    background: var(--background);
   }
-}
+  .desktop-nav,
+  .theme-toggle {
+    background: var(--card) !important;
+  }
+}
+
+/* ==========================================================================
+ * Scroll behaviour
+ *
+ * All of it runs on CSS scroll-driven animations — `scroll()` for things tied
+ * to page position, `view()` for things tied to an element entering. That
+ * keeps the scroll path free of listeners and off the main thread.
+ *
+ * Two rules throughout:
+ *   - the un-animated state is the *finished* state, so a browser without
+ *     scroll timelines (Firefox, older Safari) shows everything normally;
+ *   - every effect sits inside `prefers-reduced-motion: no-preference`.
+ * ========================================================================== */
+
+@keyframes kg-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes kg-rise {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes kg-lift {
+  from {
+    box-shadow: 0 0 0 rgba(12, 18, 18, 0);
+  }
+  to {
+    box-shadow: 0 10px 30px -20px rgba(12, 18, 18, 0.55);
+  }
+}
+
+/* --- the read-progress hairline ------------------------------------------ */
+
+.scroll-progress {
+  position: absolute;
+  inset: auto 0 -1px;
+  height: 2px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.scroll-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--field);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .scroll-progress > span {
+      animation: kg-progress linear both;
+      animation-timeline: scroll(root block);
+    }
+    /* The glass bar picks up a shadow once it is actually overlapping content. */
+    .site-header {
+      animation: kg-lift linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 140px;
+    }
+  }
+}
+
+/* --- content rising into view -------------------------------------------- */
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .scroll-rise,
+    .saved-strip,
+    .principles-grid > div,
+    .portal-feature,
+    .card-brutal {
+      animation: kg-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 2% entry 40%;
+    }
+
+    /*
+     * Stagger by shifting each column's range rather than by animation-delay:
+     * a scroll timeline has no wall clock, so a delay would do nothing. Later
+     * columns finish arriving a little further up the screen.
+     */
+    .principles-grid > div:nth-child(2),
+    .portal-features > *:nth-child(2),
+    .saved-strip:nth-child(2) {
+      animation-range: entry 8% entry 48%;
+    }
+    .principles-grid > div:nth-child(3),
+    .portal-features > *:nth-child(3) {
+      animation-range: entry 14% entry 56%;
+    }
+  }
+}
+
+/* --- pointer micro-motion ------------------------------------------------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .portal-feature-cta svg,
+  .inline-link svg,
+  .card-cta svg {
+    transition: transform 0.22s var(--ease-out);
+  }
+  .portal-feature-link:hover .portal-feature-cta svg,
+  .saved-strip:hover .inline-link svg,
+  a:hover > .card-cta svg {
+    transform: translateX(4px);
+  }
+  .saved-strip {
+    transition:
+      border-color 0.2s ease,
+      transform 0.25s var(--ease-out);
+  }
+  .saved-strip:hover {
+    border-color: var(--field);
+    transform: translateY(-2px);
+  }
+}

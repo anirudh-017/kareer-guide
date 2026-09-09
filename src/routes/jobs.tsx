@@ -3,7 +3,6 @@ import { Bookmark, ExternalLink, FileText } from "lucide-react";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { toast } from "sonner";
 
-import { JobSearchIllustration } from "@/components/illustrations";
 import { Page } from "@/components/Page";
 import { saveJob } from "@/lib/savedJobs";
 import { seo } from "@/lib/seo";
@@ -117,7 +116,6 @@ function Jobs() {
 
   return (
     <Page
-      art={<JobSearchIllustration />}
       title="Your next possibilities."
       intro="Explore your matches, refine the results, and save the roles worth a closer look."
     >

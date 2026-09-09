@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Kareer Guide">
+  <title>Kareer Guide</title>
+  <!--
+    The mark is the wordmark's initial cut to the same rules as the rest of the
+    system: one green, one weight, no gradient and no glow. The K's arm and leg
+    spring from a single joint on the stem — a path branching upward, which is
+    the whole product in one glyph. Built from three strokes so it survives
+    being drawn at 16px.
+  -->
+  <rect width="64" height="64" rx="15" fill="#0b3b2a" />
+  <path
+    d="M21 16V48M21 32L43 16M21 32L45 48"
+    stroke="#ffffff"
+    stroke-width="8"
+    stroke-linecap="butt"
+    stroke-linejoin="miter"
+    fill="none"
+  />
+</svg>

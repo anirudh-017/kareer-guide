@@ -11,7 +11,6 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
-import { DreamJobIllustration } from "@/components/illustrations";
 import { Page } from "@/components/Page";
 import { seo } from "@/lib/seo";
 import { buildSkillGaps, computeMatchScore, matchCategory, matchHeadline } from "@/lib/dream/match";
@@ -34,18 +33,18 @@ export const Route = createFileRoute("/dream-job_/results")({
 function statusIcon(s: GapStatus) {
   if (s === "match")
     return (
-      <span aria-label="match" style={{ color: "#2e9e6b" }}>
+      <span aria-label="match" style={{ color: "#2f6f52" }}>
         ✓
       </span>
     );
   if (s === "partial")
     return (
-      <span aria-label="partial match" style={{ color: "#e0a100" }}>
+      <span aria-label="partial match" style={{ color: "#8a6a1f" }}>
         ⚠
       </span>
     );
   return (
-    <span aria-label="missing" style={{ color: "#dd6a57" }}>
+    <span aria-label="missing" style={{ color: "#8c3a2b" }}>
       ✕
     </span>
   );
@@ -70,7 +69,7 @@ function Missing({ what, onRetry }: { what: string; onRetry: () => void }) {
 }
 
 function matchColor(v: number) {
-  return v >= 80 ? "#2e9e6b" : v >= 60 ? "#e0a100" : "#dd6a57";
+  return v >= 80 ? "#2f6f52" : v >= 60 ? "#8a6a1f" : "#8c3a2b";
 }
 
 function DreamResults() {
@@ -178,7 +177,7 @@ function DreamResults() {
 
   if (!saved) {
     return (
-      <Page art={<DreamJobIllustration />} title="Dream Job Analysis">
+      <Page title="Dream Job Analysis">
         <p className="text-sm text-muted-foreground">No analysis yet — start from the wizard.</p>
         <Link to="/dream-job" className="btn-brutal mt-6">
           <span className="relative z-10">START DREAM JOB ANALYSIS</span>
@@ -219,7 +218,7 @@ function DreamResults() {
   const staleDays = ageDays !== null && ageDays >= STALE_AFTER_DAYS ? ageDays : null;
 
   return (
-    <Page art={<DreamJobIllustration />} title="Dream Job Analysis" intro={saved.match.explanation}>
+    <Page title="Dream Job Analysis" intro={saved.match.explanation}>
       {/* 1-2. Header + overall match */}
       <div className="grid gap-px border border-border bg-border md:grid-cols-3">
         <div className="bg-background p-6 md:col-span-1">
@@ -245,7 +244,7 @@ function DreamResults() {
         <div className="bg-background p-6">
           <p className="label text-muted-foreground">ELIGIBILITY STATUS</p>
           {saved.match.eligible ? (
-            <p className="mt-2 text-2xl font-black" style={{ color: "#2e9e6b" }}>
+            <p className="mt-2 text-2xl font-black" style={{ color: "#2f6f52" }}>
               🎉 You're Currently Eligible
             </p>
           ) : (
@@ -340,7 +339,7 @@ function DreamResults() {
           <ul className="mt-3 grid gap-2 text-sm md:grid-cols-2">
             {saved.match.strengths.map((s, k) => (
               <li key={`${k}-${s}`} className="flex items-center gap-2">
-                <span style={{ color: "#2e9e6b" }}>✓</span> {s}
+                <span style={{ color: "#2f6f52" }}>✓</span> {s}
               </li>
             ))}
           </ul>
