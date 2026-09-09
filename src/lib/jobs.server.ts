@@ -97,11 +97,15 @@ async function jsearch(query: string, location: string): Promise<Job[]> {
   const key = env("RAPIDAPI_KEY");
   if (!key) return [];
   const q = encodeURIComponent(`${query} ${location}`.trim());
+  // JSearch v5 renamed /search to /search-v2 (the old path now 404s) and moved
+  // the job array from `data` down to `data.jobs`. Field names are unchanged.
+  // num_pages stays at 1: page 2 pushes the response past 25s — well beyond
+  // TIMEOUT — for the same jobs, so asking for it silently drops the source.
   const data = (await getJson(
-    `https://jsearch.p.rapidapi.com/search?query=${q}&page=1&num_pages=2`,
+    `https://jsearch.p.rapidapi.com/search-v2?query=${q}&num_pages=1&date_posted=all`,
     { headers: { "X-RapidAPI-Key": key, "X-RapidAPI-Host": "jsearch.p.rapidapi.com" } },
   )) as Any;
-  return (data.data ?? []).slice(0, 30).map((j: Any): Job => ({
+  return (data.data?.jobs ?? []).slice(0, 30).map((j: Any): Job => ({
     title: j.job_title ?? "",
     company: j.employer_name ?? "",
     location:
