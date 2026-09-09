@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, MapPin, Upload } from "lucide-react";
+import { Loader2, MapPin, Plus, Sparkles, Upload, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -8,6 +8,7 @@ import { Page } from "@/components/Page";
 import { seo } from "@/lib/seo";
 import { analyzeResume, searchJobs } from "@/lib/jobsy.functions";
 import { countryCodeFor } from "@/lib/countries";
+import type { RoleType } from "@/lib/jobs.server";
 import { extractResumeText } from "@/lib/resumeParse";
 import { SK, writeJson } from "@/lib/session";
 
@@ -16,7 +17,7 @@ export const Route = createFileRoute("/recommendations")({
     seo({
       title: "Job Match — Upload Your Resume",
       description:
-        "Upload a PDF or DOCX resume, or type your skills, and Kareer Guide finds live jobs and internships that match you.",
+        "Upload a PDF or DOCX resume, or pick your skills, and Kareer Guide finds live jobs, internships and part-time roles that match you.",
       path: "/recommendations",
       keywords: [
         "resume job matching",
@@ -27,6 +28,48 @@ export const Route = createFileRoute("/recommendations")({
     }),
   component: Recommendations,
 });
+
+/**
+ * Quick-add skills. Deliberately not all-technical — this is a careers product
+ * for every student, so design, business and communication skills sit here too.
+ */
+const POPULAR_SKILLS = [
+  "JavaScript",
+  "Python",
+  "React",
+  "Node.js",
+  "SQL",
+  "Java",
+  "TypeScript",
+  "Machine Learning",
+  "Data Analysis",
+  "AWS",
+  "Docker",
+  "Git",
+  "HTML/CSS",
+  "C++",
+  "Figma",
+  "UI/UX Design",
+  "Project Management",
+  "Communication",
+  "Leadership",
+  "Marketing",
+  "Sales",
+  "Excel",
+  "Photoshop",
+  "Writing",
+  "Public Speaking",
+  "Accounting",
+  "Finance",
+  "Statistics",
+  "R",
+] as const;
+
+const ROLE_TYPES: { value: RoleType; label: string }[] = [
+  { value: "full-time", label: "FULL-TIME JOB" },
+  { value: "internship", label: "INTERNSHIP" },
+  { value: "part-time", label: "PART-TIME" },
+];
 
 type NominatimAddress = {
   city?: string;
@@ -41,14 +84,28 @@ function Recommendations() {
   const doAnalyze = useServerFn(analyzeResume);
   const doSearch = useServerFn(searchJobs);
 
-  const [mode, setMode] = useState<"resume" | "skills">("resume");
+  const [mode, setMode] = useState<"resume" | "skills">("skills");
   const [fileName, setFileName] = useState("");
   const [resumeText, setResumeText] = useState("");
-  const [skills, setSkills] = useState("");
+  const [skills, setSkills] = useState<string[]>([]);
+  const [skillInput, setSkillInput] = useState("");
   const [location, setLocation] = useState("");
-  const [internship, setInternship] = useState(false);
+  const [roleType, setRoleType] = useState<RoleType>("full-time");
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState("");
+
+  function addSkill(raw: string) {
+    const name = raw.trim();
+    if (!name) return;
+    if (skills.some((s) => s.toLowerCase() === name.toLowerCase())) {
+      setSkillInput("");
+      return;
+    }
+    setSkills((current) => [...current, name]);
+    setSkillInput("");
+  }
+
+  const removeSkill = (name: string) => setSkills((c) => c.filter((s) => s !== name));
 
   async function handleFile(file: File) {
     try {
@@ -97,11 +154,9 @@ function Recommendations() {
         if (!skillList.length) throw new Error("Could not read any skills from that resume");
         sessionStorage.setItem(SK.resumeText, resumeText);
       } else {
-        skillList = skills
-          .split(/[,\n]/)
-          .map((s) => s.trim())
-          .filter(Boolean);
-        if (!skillList.length) throw new Error("Enter at least one skill");
+        // A skill typed but not yet committed shouldn't be silently dropped.
+        skillList = skillInput.trim() ? [...skills, skillInput.trim()] : skills;
+        if (!skillList.length) throw new Error("Add at least one skill");
       }
       writeJson(SK.skills, skillList);
       setStatus("Searching live job boards…");
@@ -109,7 +164,7 @@ function Recommendations() {
         data: {
           skills: skillList,
           location,
-          internship,
+          roleType,
           countryCode: countryCodeFor(location),
         },
       });
@@ -130,91 +185,163 @@ function Recommendations() {
 
   return (
     <Page
-      title="Job Match"
-      intro="Give us your resume or just your skills. We read them, then search thousands of live listings for the roles that actually fit."
+      title="Know What Suits You Best"
+      intro="Upload your resume or select skills — we'll find real jobs from LinkedIn, Naukri, Internshala & more."
     >
-      <div className="flex">
-        {(["resume", "skills"] as const).map((m) => (
+      {/* Source of skills */}
+      <div className="grid gap-px border border-border bg-border sm:grid-cols-2">
+        {(
+          [
+            { value: "resume", label: "UPLOAD RESUME", icon: Upload },
+            { value: "skills", label: "SELECT SKILLS", icon: Sparkles },
+          ] as const
+        ).map(({ value, label, icon: Icon }) => (
           <button
-            key={m}
-            onClick={() => setMode(m)}
-            className={`btn-brutal -ml-px ${mode === m ? "bg-foreground text-background" : ""}`}
+            key={value}
+            onClick={() => setMode(value)}
+            aria-pressed={mode === value}
+            className={`flex items-center justify-center gap-3 px-6 py-5 text-sm font-semibold tracking-wider ${
+              mode === value
+                ? "bg-foreground text-background"
+                : "bg-background text-muted-foreground hover:text-foreground"
+            }`}
           >
-            <span className="relative z-10">
-              {m === "resume" ? "UPLOAD RESUME" : "ENTER SKILLS"}
-            </span>
-            {mode !== m && <span className="nav-fill" />}
+            <Icon className="h-4 w-4" />
+            {label}
           </button>
         ))}
       </div>
 
-      <div className="mt-6 card-brutal">
-        {mode === "resume" ? (
-          <label className="flex cursor-pointer flex-col items-center gap-3 border border-dashed border-border p-10 text-center">
-            <Upload className="h-6 w-6" />
-            <span className="label">{fileName || "CHOOSE PDF, DOCX OR TXT (MAX 10MB)"}</span>
-            <input
-              type="file"
-              accept=".pdf,.docx,.txt"
-              className="hidden"
-              onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
-            />
-          </label>
-        ) : (
-          <textarea
-            className="input-brutal h-40"
-            placeholder="react, typescript, data analysis, python, product management…"
-            value={skills}
-            onChange={(e) => setSkills(e.target.value)}
+      {mode === "resume" && (
+        <label className="mt-8 flex cursor-pointer flex-col items-center gap-3 border border-dashed border-border p-10 text-center">
+          <Upload className="h-6 w-6" />
+          <span className="label">{fileName || "CHOOSE PDF, DOCX OR TXT (MAX 10MB)"}</span>
+          <input
+            type="file"
+            accept=".pdf,.docx,.txt"
+            className="hidden"
+            onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
           />
-        )}
+        </label>
+      )}
 
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <div>
-            <p className="label mb-2">LOCATION (OPTIONAL)</p>
-            <div className="flex">
-              <input
-                className="input-brutal"
-                placeholder="Bengaluru, India"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-              />
-              <button className="btn-brutal -ml-px shrink-0" onClick={detectLocation}>
-                <span className="relative z-10">
-                  <MapPin className="h-3.5 w-3.5" />
-                </span>
-                <span className="nav-fill" />
-              </button>
-            </div>
-          </div>
-          <div>
-            <p className="label mb-2">LOOKING FOR</p>
-            <div className="flex">
-              {[false, true].map((v) => (
-                <button
-                  key={String(v)}
-                  onClick={() => setInternship(v)}
-                  className={`btn-brutal -ml-px flex-1 ${internship === v ? "bg-foreground text-background" : ""}`}
-                >
-                  <span className="relative z-10">{v ? "INTERNSHIPS" : "JOBS"}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+      {/* Role type */}
+      <p className="label mt-8 text-muted-foreground">WHAT TYPE OF ROLE?</p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {ROLE_TYPES.map((r) => (
+          <button
+            key={r.value}
+            onClick={() => setRoleType(r.value)}
+            aria-pressed={roleType === r.value}
+            className={`border border-border px-5 py-3 text-sm tracking-wider ${
+              roleType === r.value
+                ? "bg-foreground font-bold text-background"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {r.label}
+          </button>
+        ))}
+      </div>
 
+      {/* Location */}
+      <p className="label mt-8 text-muted-foreground">YOUR LOCATION (FOR NEARBY JOBS)</p>
+      <div className="mt-3 flex">
+        <input
+          className="input-brutal px-5 py-4 text-base"
+          placeholder="Bengaluru, India"
+          aria-label="Your location"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+        />
         <button
-          disabled={busy}
-          className="btn-brutal mt-6 w-full disabled:opacity-60"
-          onClick={submit}
+          className="btn-brutal -ml-px shrink-0 px-5"
+          onClick={detectLocation}
+          aria-label="Detect my location"
+          title="Detect my location"
         >
-          <span className="relative z-10 flex items-center gap-2">
-            {busy && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-            {busy ? status || "WORKING…" : "FIND MY JOBS"}
+          <span className="relative z-10">
+            <MapPin className="h-4 w-4" />
           </span>
           <span className="nav-fill" />
         </button>
       </div>
+
+      {mode === "skills" && (
+        <>
+          {/* Skill entry */}
+          <div className="mt-6 flex">
+            <input
+              className="input-brutal px-5 py-4 text-base"
+              placeholder="Type a skill and press Enter…"
+              aria-label="Add a skill"
+              value={skillInput}
+              onChange={(e) => setSkillInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addSkill(skillInput);
+                }
+              }}
+            />
+            <button
+              className="btn-brutal -ml-px shrink-0 px-5"
+              onClick={() => addSkill(skillInput)}
+              aria-label="Add skill"
+              title="Add skill"
+            >
+              <span className="relative z-10">
+                <Plus className="h-4 w-4" />
+              </span>
+              <span className="nav-fill" />
+            </button>
+          </div>
+
+          {skills.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {skills.map((s) => (
+                <span
+                  key={s}
+                  className="label flex items-center gap-2 border border-border px-3 py-2"
+                  style={{ background: "var(--pink)", color: "#000" }}
+                >
+                  {s}
+                  <button onClick={() => removeSkill(s)} aria-label={`Remove ${s}`}>
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          <p className="label mt-8 text-muted-foreground">POPULAR SKILLS</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {POPULAR_SKILLS.filter(
+              (s) => !skills.some((x) => x.toLowerCase() === s.toLowerCase()),
+            ).map((s) => (
+              <button
+                key={s}
+                onClick={() => addSkill(s)}
+                className="border border-border px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+
+      <button
+        disabled={busy}
+        className="btn-brutal mt-10 w-full py-5 disabled:cursor-not-allowed disabled:opacity-50"
+        onClick={submit}
+      >
+        <span className="relative z-10 flex items-center gap-3 text-sm">
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+          {busy ? status || "WORKING…" : "FIND JOBS"}
+        </span>
+        {!busy && <span className="nav-fill" />}
+      </button>
     </Page>
   );
 }

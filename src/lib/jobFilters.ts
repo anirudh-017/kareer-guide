@@ -24,6 +24,8 @@ export function experienceOf(job: Job): "entry" | "mid" | "senior" {
 export function typeOf(job: Job): string {
   const t = `${job.jobType} ${job.title}`.toLowerCase();
   if (t.includes("intern")) return "internship";
+  // Boards spell this "part-time", "part time" and "parttime".
+  if (/part[\s_-]?time/.test(t)) return "part-time";
   if (t.includes("remote")) return "remote";
   return "full-time";
 }

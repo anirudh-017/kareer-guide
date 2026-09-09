@@ -97,11 +97,15 @@ async function jsearch(query: string, location: string): Promise<Job[]> {
   const key = env("RAPIDAPI_KEY");
   if (!key) return [];
   const q = encodeURIComponent(`${query} ${location}`.trim());
+  // JSearch v5 renamed /search to /search-v2 (the old path now 404s) and moved
+  // the job array from `data` down to `data.jobs`. Field names are unchanged.
+  // num_pages stays at 1: page 2 pushes the response past 25s — well beyond
+  // TIMEOUT — for the same jobs, so asking for it silently drops the source.
   const data = (await getJson(
-    `https://jsearch.p.rapidapi.com/search?query=${q}&page=1&num_pages=2`,
+    `https://jsearch.p.rapidapi.com/search-v2?query=${q}&num_pages=1&date_posted=all`,
     { headers: { "X-RapidAPI-Key": key, "X-RapidAPI-Host": "jsearch.p.rapidapi.com" } },
   )) as Any;
-  return (data.data ?? []).slice(0, 30).map((j: Any): Job => ({
+  return (data.data?.jobs ?? []).slice(0, 30).map((j: Any): Job => ({
     title: j.job_title ?? "",
     company: j.employer_name ?? "",
     location:
@@ -537,9 +541,14 @@ export function dedupe(jobs: Job[]): Job[] {
   });
 }
 
+/** What kind of role the user is after — drives the query and the sources. */
+export type RoleType = "full-time" | "internship" | "part-time";
+
 export type JobSearchOptions = {
   skills: string[];
   location?: string | undefined;
+  roleType?: RoleType | undefined;
+  /** @deprecated Superseded by `roleType`; kept so existing callers still work. */
   internship?: boolean | undefined;
   countryCode?: string | undefined;
 };
@@ -547,10 +556,17 @@ export type JobSearchOptions = {
 export async function aggregateJobs(opts: JobSearchOptions): Promise<Job[]> {
   const skills = opts.skills.filter(Boolean).slice(0, 20);
   const location = opts.location ?? "";
-  const intern = opts.internship ?? false;
+  const roleType: RoleType = opts.roleType ?? (opts.internship ? "internship" : "full-time");
+  const intern = roleType === "internship";
   const country = opts.countryCode ?? countryCodeFor(opts.location) ?? DEFAULT_COUNTRY;
   const primary = skills.slice(0, 3).join(" ") || "software";
-  const query = intern ? `${primary} internship` : primary;
+  // Boards have no structured filter for these, so the intent goes in the query.
+  const query =
+    roleType === "internship"
+      ? `${primary} internship`
+      : roleType === "part-time"
+        ? `${primary} part time`
+        : primary;
 
   const batches = await Promise.all([
     wrap("jsearch", jsearch(query, location)),

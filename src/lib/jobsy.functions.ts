@@ -34,6 +34,7 @@ export const analyzeResume = createServerFn({ method: "POST" })
 const SearchInput = z.object({
   skills: z.array(z.string()).min(1),
   location: z.string().optional(),
+  roleType: z.enum(["full-time", "internship", "part-time"]).optional(),
   internship: z.boolean().optional(),
   countryCode: z.string().optional(),
 });

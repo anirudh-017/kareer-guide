@@ -85,4 +85,15 @@ describe("typeOf", () => {
     expect(typeOf(job({ jobType: "remote" }))).toBe("remote");
     expect(typeOf(job({ jobType: "full_time" }))).toBe("full-time");
   });
+
+  it("recognises part-time however the board spells it", () => {
+    expect(typeOf(job({ jobType: "part-time" }))).toBe("part-time");
+    expect(typeOf(job({ jobType: "part time" }))).toBe("part-time");
+    expect(typeOf(job({ jobType: "parttime" }))).toBe("part-time");
+    expect(typeOf(job({ jobType: "", title: "Part-Time Sales Associate" }))).toBe("part-time");
+  });
+
+  it("still ranks internship above part-time when a listing says both", () => {
+    expect(typeOf(job({ jobType: "part-time internship" }))).toBe("internship");
+  });
 });

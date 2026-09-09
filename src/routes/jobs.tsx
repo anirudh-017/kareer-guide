@@ -151,6 +151,7 @@ function Jobs() {
               <option value="all">ALL TYPES</option>
               <option value="full-time">FULL-TIME</option>
               <option value="internship">INTERNSHIP</option>
+              <option value="part-time">PART-TIME</option>
               <option value="remote">REMOTE</option>
             </select>
             <select

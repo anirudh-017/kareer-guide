@@ -21,6 +21,9 @@ dist-ssr
 .env.*
 !.env.example
 
+# Vercel build output (Build Output API v3)
+.vercel
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
