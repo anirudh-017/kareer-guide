@@ -12,7 +12,11 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as JobsRouteImport } from './routes/jobs'
 import { Route as RecommendationsRouteImport } from './routes/recommendations'
+import { Route as ResumeAnalysisRouteImport } from './routes/resume-analysis'
+import { Route as RoadmapRouteImport } from './routes/roadmap'
 import { Route as SavedJobsRouteImport } from './routes/saved-jobs'
+import { Route as TailorResumeRouteImport } from './routes/tailor-resume'
+import { Route as TailoredResumeRouteImport } from './routes/tailored-resume'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -29,9 +33,29 @@ const RecommendationsRoute = RecommendationsRouteImport.update({
   path: '/recommendations',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResumeAnalysisRoute = ResumeAnalysisRouteImport.update({
+  id: '/resume-analysis',
+  path: '/resume-analysis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RoadmapRoute = RoadmapRouteImport.update({
+  id: '/roadmap',
+  path: '/roadmap',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SavedJobsRoute = SavedJobsRouteImport.update({
   id: '/saved-jobs',
   path: '/saved-jobs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TailorResumeRoute = TailorResumeRouteImport.update({
+  id: '/tailor-resume',
+  path: '/tailor-resume',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TailoredResumeRoute = TailoredResumeRouteImport.update({
+  id: '/tailored-resume',
+  path: '/tailored-resume',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -39,34 +63,75 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/jobs': typeof JobsRoute
   '/recommendations': typeof RecommendationsRoute
+  '/resume-analysis': typeof ResumeAnalysisRoute
+  '/roadmap': typeof RoadmapRoute
   '/saved-jobs': typeof SavedJobsRoute
+  '/tailor-resume': typeof TailorResumeRoute
+  '/tailored-resume': typeof TailoredResumeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/jobs': typeof JobsRoute
   '/recommendations': typeof RecommendationsRoute
+  '/resume-analysis': typeof ResumeAnalysisRoute
+  '/roadmap': typeof RoadmapRoute
   '/saved-jobs': typeof SavedJobsRoute
+  '/tailor-resume': typeof TailorResumeRoute
+  '/tailored-resume': typeof TailoredResumeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/jobs': typeof JobsRoute
   '/recommendations': typeof RecommendationsRoute
+  '/resume-analysis': typeof ResumeAnalysisRoute
+  '/roadmap': typeof RoadmapRoute
   '/saved-jobs': typeof SavedJobsRoute
+  '/tailor-resume': typeof TailorResumeRoute
+  '/tailored-resume': typeof TailoredResumeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/jobs' | '/recommendations' | '/saved-jobs'
+  fullPaths:
+    | '/'
+    | '/jobs'
+    | '/recommendations'
+    | '/resume-analysis'
+    | '/roadmap'
+    | '/saved-jobs'
+    | '/tailor-resume'
+    | '/tailored-resume'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/jobs' | '/recommendations' | '/saved-jobs'
-  id: '__root__' | '/' | '/jobs' | '/recommendations' | '/saved-jobs'
+  to:
+    | '/'
+    | '/jobs'
+    | '/recommendations'
+    | '/resume-analysis'
+    | '/roadmap'
+    | '/saved-jobs'
+    | '/tailor-resume'
+    | '/tailored-resume'
+  id:
+    | '__root__'
+    | '/'
+    | '/jobs'
+    | '/recommendations'
+    | '/resume-analysis'
+    | '/roadmap'
+    | '/saved-jobs'
+    | '/tailor-resume'
+    | '/tailored-resume'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   JobsRoute: typeof JobsRoute
   RecommendationsRoute: typeof RecommendationsRoute
+  ResumeAnalysisRoute: typeof ResumeAnalysisRoute
+  RoadmapRoute: typeof RoadmapRoute
   SavedJobsRoute: typeof SavedJobsRoute
+  TailorResumeRoute: typeof TailorResumeRoute
+  TailoredResumeRoute: typeof TailoredResumeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -92,11 +157,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RecommendationsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/resume-analysis': {
+      id: '/resume-analysis'
+      path: '/resume-analysis'
+      fullPath: '/resume-analysis'
+      preLoaderRoute: typeof ResumeAnalysisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/roadmap': {
+      id: '/roadmap'
+      path: '/roadmap'
+      fullPath: '/roadmap'
+      preLoaderRoute: typeof RoadmapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/saved-jobs': {
       id: '/saved-jobs'
       path: '/saved-jobs'
       fullPath: '/saved-jobs'
       preLoaderRoute: typeof SavedJobsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tailor-resume': {
+      id: '/tailor-resume'
+      path: '/tailor-resume'
+      fullPath: '/tailor-resume'
+      preLoaderRoute: typeof TailorResumeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tailored-resume': {
+      id: '/tailored-resume'
+      path: '/tailored-resume'
+      fullPath: '/tailored-resume'
+      preLoaderRoute: typeof TailoredResumeRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -106,7 +199,11 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   JobsRoute: JobsRoute,
   RecommendationsRoute: RecommendationsRoute,
+  ResumeAnalysisRoute: ResumeAnalysisRoute,
+  RoadmapRoute: RoadmapRoute,
   SavedJobsRoute: SavedJobsRoute,
+  TailorResumeRoute: TailorResumeRoute,
+  TailoredResumeRoute: TailoredResumeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
