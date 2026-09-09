@@ -537,9 +537,14 @@ export function dedupe(jobs: Job[]): Job[] {
   });
 }
 
+/** What kind of role the user is after — drives the query and the sources. */
+export type RoleType = "full-time" | "internship" | "part-time";
+
 export type JobSearchOptions = {
   skills: string[];
   location?: string | undefined;
+  roleType?: RoleType | undefined;
+  /** @deprecated Superseded by `roleType`; kept so existing callers still work. */
   internship?: boolean | undefined;
   countryCode?: string | undefined;
 };
@@ -547,10 +552,17 @@ export type JobSearchOptions = {
 export async function aggregateJobs(opts: JobSearchOptions): Promise<Job[]> {
   const skills = opts.skills.filter(Boolean).slice(0, 20);
   const location = opts.location ?? "";
-  const intern = opts.internship ?? false;
+  const roleType: RoleType = opts.roleType ?? (opts.internship ? "internship" : "full-time");
+  const intern = roleType === "internship";
   const country = opts.countryCode ?? countryCodeFor(opts.location) ?? DEFAULT_COUNTRY;
   const primary = skills.slice(0, 3).join(" ") || "software";
-  const query = intern ? `${primary} internship` : primary;
+  // Boards have no structured filter for these, so the intent goes in the query.
+  const query =
+    roleType === "internship"
+      ? `${primary} internship`
+      : roleType === "part-time"
+        ? `${primary} part time`
+        : primary;
 
   const batches = await Promise.all([
     wrap("jsearch", jsearch(query, location)),
