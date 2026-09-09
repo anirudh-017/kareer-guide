@@ -267,3 +267,79 @@
   }
 }
 
+
+/* ---------------------------------------------------------------------------
+ * Motion
+ *
+ * Two mechanisms, deliberately different:
+ *
+ * - `.rise` is a pure-CSS entrance for above-the-fold content. `animation-fill-
+ *   mode: both` means it starts hidden and always ends visible, so content can
+ *   never be stranded invisible if JavaScript fails.
+ * - `[data-reveal]` is for below-the-fold content. The hidden state is only
+ *   applied by JS (see components/ui/reveal.tsx), so with JS off everything
+ *   simply renders.
+ *
+ * Everything here is switched off under prefers-reduced-motion.
+ * ------------------------------------------------------------------------- */
+
+html {
+  scroll-behavior: smooth;
+}
+
+@keyframes kg-rise {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rise {
+  animation: kg-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+[data-reveal="hidden"] {
+  opacity: 0;
+  transform: translateY(1.5rem);
+}
+
+[data-reveal="shown"] {
+  animation: kg-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* The dotted backdrop drifts a little as the page scrolls. */
+@keyframes kg-drift {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 20px 20px;
+  }
+}
+
+.drift {
+  animation: kg-drift 6s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .rise,
+  .drift,
+  [data-reveal="shown"],
+  .menu-item,
+  .kc > span {
+    animation: none !important;
+  }
+
+  [data-reveal="hidden"] {
+    opacity: 1;
+    transform: none;
+  }
+}

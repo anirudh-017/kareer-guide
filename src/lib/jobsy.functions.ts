@@ -9,7 +9,7 @@ import {
   tailorResume,
 } from "./jobsy.core";
 import { rateLimit } from "./rate-limit.server";
-import type { Job, ResumeAnalysis, RoadmapPhase } from "./types";
+import type { Job, ResumeAnalysis, Roadmap } from "./types";
 
 /**
  * The web app's entry points. Every handler is a thin shell — validate, meter,
@@ -51,9 +51,9 @@ export const generateRoadmap = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z.object({ role: z.string().min(2), background: z.string().optional() }).parse(d),
   )
-  .handler(async ({ data }): Promise<{ phases: RoadmapPhase[] }> => {
+  .handler(async ({ data }): Promise<Roadmap> => {
     rateLimit("ai");
-    return { phases: await buildRoadmap(data.role, data.background) };
+    return buildRoadmap(data.role, data.background);
   });
 
 /* ---------------------------- resume tailoring ---------------------------- */

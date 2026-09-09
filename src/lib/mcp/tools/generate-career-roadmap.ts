@@ -8,7 +8,7 @@ export default defineTool({
   name: "generate_career_roadmap",
   title: "Generate a career roadmap",
   description:
-    "Build a 6-8 phase learning path to a target role. Each phase carries the skills to learn, free resources, project ideas and the milestones that mark it complete.",
+    "Build a complete learning roadmap for a target role: a market overview, prerequisites, and 5-7 phases that each carry topics with explanations, tools, real named resources, hands-on projects and a milestone that proves the phase is done.",
   inputSchema: {
     role: z.string().min(2).describe("Target role, e.g. 'Data Analyst' or 'Frontend Engineer'"),
     background: z
@@ -18,8 +18,8 @@ export default defineTool({
   },
   handler: async ({ role, background }) => {
     rateLimit("ai");
-    const phases = await buildRoadmap(role, background);
-    if (!phases.length) {
+    const roadmap = await buildRoadmap(role, background);
+    if (!roadmap.phases.length) {
       return {
         content: [
           { type: "text" as const, text: `Could not build a roadmap for "${role}". Try again.` },
@@ -27,27 +27,58 @@ export default defineTool({
       };
     }
 
-    const summary = phases
-      .map(
-        (p, i) =>
-          `Phase ${i + 1}: ${p.phase} (${p.duration})\n  Skills: ${(p.skills ?? []).join(", ")}\n  Resources: ${(p.resources ?? []).join(", ")}\n  Projects: ${(p.projects ?? []).join(", ")}\n  Milestones: ${(p.milestones ?? []).join(", ")}`,
+    const summary = roadmap.phases
+      .map((p, i) =>
+        [
+          `Phase ${i + 1}: ${p.phase} — ${p.duration} (${p.difficulty})`,
+          p.description && `  ${p.description}`,
+          `  Topics: ${p.topics.map((t) => t.name).join(", ")}`,
+          `  Tools: ${p.tools.join(", ")}`,
+          `  Resources: ${p.resources.map((r) => `${r.title}${r.author ? ` by ${r.author}` : ""} [${r.type}]`).join("; ")}`,
+          `  Projects: ${p.projects.join(" | ")}`,
+          p.milestone && `  Milestone: ${p.milestone}`,
+        ]
+          .filter(Boolean)
+          .join("\n"),
       )
       .join("\n\n");
 
+    const header = [
+      `Roadmap to ${role}`,
+      roadmap.overview,
+      `Total duration: ${roadmap.totalDuration} · ${roadmap.phases.length} phases`,
+      roadmap.prerequisites.length ? `Prerequisites: ${roadmap.prerequisites.join("; ")}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+
     return {
-      content: [{ type: "text" as const, text: `Roadmap to ${role}:\n\n${summary}` }],
-      structuredContent: { phases },
+      content: [{ type: "text" as const, text: `${header}\n\n${summary}` }],
+      structuredContent: roadmap,
     };
   },
   outputSchema: {
+    role: z.string(),
+    overview: z.string(),
+    totalDuration: z.string(),
+    prerequisites: z.array(z.string()),
     phases: z.array(
       z.object({
         phase: z.string(),
         duration: z.string(),
-        skills: z.array(z.string()),
-        resources: z.array(z.string()),
+        difficulty: z.enum(["Beginner", "Intermediate", "Advanced"]),
+        description: z.string(),
+        topics: z.array(z.object({ name: z.string(), detail: z.string() })),
+        tools: z.array(z.string()),
+        resources: z.array(
+          z.object({
+            title: z.string(),
+            author: z.string(),
+            type: z.enum(["Course", "Book", "Website", "YouTube", "Tool", "Docs"]),
+          }),
+        ),
         projects: z.array(z.string()),
-        milestones: z.array(z.string()),
+        milestone: z.string(),
       }),
     ),
   },

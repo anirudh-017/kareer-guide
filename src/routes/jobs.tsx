@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { Page } from "@/components/Page";
+import { experienceOf, matchesLocation, typeOf } from "@/lib/jobFilters";
 import { saveJob } from "@/lib/savedJobs";
 import { seo } from "@/lib/seo";
 import { SK, readJson, writeJson } from "@/lib/session";
@@ -25,21 +26,6 @@ export const Route = createFileRoute("/jobs")({
     }),
   component: Jobs,
 });
-
-function experienceOf(job: Job): "entry" | "mid" | "senior" {
-  const t = `${job.title} ${job.description}`.toLowerCase();
-  if (/\b(senior|sr\.|lead|principal|staff|head of|manager|architect)\b/.test(t)) return "senior";
-  if (/\b(intern|internship|trainee|fresher|graduate|entry[- ]level|junior|jr\.)\b/.test(t))
-    return "entry";
-  return "mid";
-}
-
-function typeOf(job: Job): string {
-  const t = `${job.jobType} ${job.title}`.toLowerCase();
-  if (t.includes("intern")) return "internship";
-  if (t.includes("remote")) return "remote";
-  return "full-time";
-}
 
 /** How many cards to render before "show more" — the full set can top 100. */
 const PAGE_SIZE = 24;
@@ -75,7 +61,7 @@ function Jobs() {
     const out = jobs.filter((j) => {
       if (q && !`${j.title} ${j.company} ${j.description}`.toLowerCase().includes(q.toLowerCase()))
         return false;
-      if (loc && !j.location.toLowerCase().includes(loc.toLowerCase())) return false;
+      if (loc && !matchesLocation(j.location, loc)) return false;
       if (type !== "all" && typeOf(j) !== type) return false;
       if (exp !== "all" && experienceOf(j) !== exp) return false;
       if (source !== "all" && j.source !== source) return false;
@@ -211,8 +197,8 @@ function Jobs() {
             <div className="card-brutal mt-6">
               <p className="text-sm">No jobs match these filters.</p>
               <p className="mt-2 text-sm text-muted-foreground">
-                {jobs.length} result{jobs.length === 1 ? "" : "s"} came back from your search — widen
-                or clear the filters to see them.
+                {jobs.length} result{jobs.length === 1 ? "" : "s"} came back from your search —
+                widen or clear the filters to see them.
               </p>
               <button className="btn-brutal mt-5" onClick={clearFilters}>
                 <span className="relative z-10">CLEAR ALL FILTERS</span>

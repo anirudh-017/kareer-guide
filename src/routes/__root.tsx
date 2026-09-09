@@ -156,11 +156,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    // Both attributes are deliberately changed before React hydrates: the
+    // no-flash theme script adds `class="dark"` to <html>, and browser
+    // extensions (Grammarly and friends) decorate <body>. Without these,
+    // every dark-mode load logs a hydration mismatch.
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         {GTM_ID && (
           <noscript>
             <iframe

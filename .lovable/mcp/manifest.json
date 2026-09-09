@@ -1,0 +1,329 @@
+{
+  "version": 1,
+  "sdk_version": "2.0.4",
+  "path": "/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "kareer-guide-mcp",
+      "version": "1.0.0",
+      "title": "Kareer Guide"
+    },
+    "tools": [
+      {
+        "name": "search_jobs",
+        "title": "Search jobs and internships",
+        "description": "Search live jobs and internships across 13 job boards by skill. Results are de-duplicated, ranked by skill overlap and limited to postings from the last 10 days, newest first.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "skills": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1,
+              "maxItems": 20,
+              "description": "Skills, tools or role keywords to match against, e.g. ['react','typescript']"
+            },
+            "location": {
+              "type": "string",
+              "description": "Free-text location, e.g. 'Bengaluru, India'"
+            },
+            "internship": {
+              "type": "boolean",
+              "description": "Search internships instead of full roles"
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "description": "Max results (default 20)"
+            }
+          },
+          "required": [
+            "skills"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": {
+          "type": "object",
+          "properties": {
+            "jobs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "company": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "applyLink": {
+                    "type": "string"
+                  },
+                  "source": {
+                    "type": "string"
+                  },
+                  "postedAt": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "jobType": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "title",
+                  "company",
+                  "location",
+                  "description",
+                  "applyLink",
+                  "source",
+                  "postedAt",
+                  "jobType"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "jobs"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        }
+      },
+      {
+        "name": "generate_career_roadmap",
+        "title": "Generate a career roadmap",
+        "description": "Build a 6-8 phase learning path to a target role. Each phase carries the skills to learn, free resources, project ideas and the milestones that mark it complete.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "role": {
+              "type": "string",
+              "minLength": 2,
+              "description": "Target role, e.g. 'Data Analyst' or 'Frontend Engineer'"
+            },
+            "background": {
+              "type": "string",
+              "description": "Where the person is starting from, e.g. 'final year B.Com, knows Excel'"
+            }
+          },
+          "required": [
+            "role"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": {
+          "type": "object",
+          "properties": {
+            "phases": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "phase": {
+                    "type": "string"
+                  },
+                  "duration": {
+                    "type": "string"
+                  },
+                  "skills": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "resources": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "projects": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "milestones": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "phase",
+                  "duration",
+                  "skills",
+                  "resources",
+                  "projects",
+                  "milestones"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "phases"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        }
+      },
+      {
+        "name": "analyze_resume_for_job",
+        "title": "Analyse a resume against a job description",
+        "description": "Recruiter-grade review of a resume, optionally against a specific job description. Returns an overall score, a JD fit score, 15 hiring signals across ATS fit / reviewer lens / executive clarity, recruiter red flags, missing keywords and XYZ-formula bullet rewrites.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "resumeText": {
+              "type": "string",
+              "minLength": 50,
+              "description": "Plain text of the resume"
+            },
+            "jobDescription": {
+              "type": "string",
+              "description": "The job description to score against. Omitted means fitScore is 0."
+            },
+            "region": {
+              "type": "string",
+              "description": "Target market, e.g. 'India' or 'United States'"
+            },
+            "companyProfile": {
+              "type": "string",
+              "description": "Employer type: Standard Professional, Large MNC / Fortune 500, Vendor / Staffing, Implementation Partner, Startup, Public Sector, Others"
+            }
+          },
+          "required": [
+            "resumeText"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": {
+          "type": "object",
+          "properties": {
+            "score": {
+              "type": "number"
+            },
+            "fitScore": {
+              "type": "number"
+            },
+            "missingKeywords": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "redFlags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "atsFit": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "score": {
+                    "type": "number"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "score",
+                  "note"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "reviewerLens": {
+              "type": "array",
+              "items": {
+                "$ref": "#/properties/atsFit/items"
+              }
+            },
+            "executiveClarity": {
+              "type": "array",
+              "items": {
+                "$ref": "#/properties/atsFit/items"
+              }
+            },
+            "priorityFixes": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "bulletRewrites": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "before": {
+                    "type": "string"
+                  },
+                  "after": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "before",
+                  "after"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "summaryRewrite": {
+              "type": "string"
+            },
+            "benchmark": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "score",
+            "fitScore",
+            "missingKeywords",
+            "redFlags",
+            "atsFit",
+            "reviewerLens",
+            "executiveClarity",
+            "priorityFixes",
+            "bulletRewrites",
+            "summaryRewrite",
+            "benchmark"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        }
+      }
+    ]
+  }
+}

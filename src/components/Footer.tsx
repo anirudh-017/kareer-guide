@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 
 const LINKS = [
   { to: "/recommendations", label: "JOB MATCH" },
+  { to: "/dream-job", label: "DREAM JOB" },
   { to: "/saved-jobs", label: "SAVED JOBS" },
   { to: "/tailor-resume", label: "TAILOR RESUME" },
   { to: "/roadmap", label: "ROADMAP" },

@@ -58,13 +58,13 @@ const ENTITIES: Record<string, string> = {
  * after a decode pass — strip tags before decoding and you keep "img src=..."
  * as body text. `&amp;` is decoded last so "&amp;lt;" cannot become a tag.
  */
-const decodeEntities = (s: string) =>
+export const decodeEntities = (s: string) =>
   Object.entries(ENTITIES).reduce(
     (acc, [entity, char]) => acc.split(entity).join(char),
     s.replace(/&#(\d+);/g, (_, code: string) => String.fromCharCode(Number(code))),
   );
 
-const clean = (html: string | undefined | null) =>
+export const clean = (html: string | undefined | null) =>
   decodeEntities(html ?? "")
     .replace(/<[^>]*>/g, " ")
     .replace(/&[a-z]+;/gi, " ")
@@ -366,9 +366,12 @@ async function weWorkRemotely(query: string): Promise<Job[]> {
         const rawTitle = field(item, "title");
         if (!rawTitle) return null;
         // Feed titles are "Company: Role" — split on the first colon only.
-        const idx = rawTitle.indexOf(":");
-        const company = idx > 0 ? rawTitle.slice(0, idx).trim() : "";
-        const title = idx > 0 ? rawTitle.slice(idx + 1).trim() : rawTitle;
+        // Decode first: titles are entity-escaped too, and "Java &amp; React"
+        // renders literally in the job card otherwise.
+        const decodedTitle = decodeEntities(rawTitle);
+        const idx = decodedTitle.indexOf(":");
+        const company = idx > 0 ? decodedTitle.slice(0, idx).trim() : "";
+        const title = idx > 0 ? decodedTitle.slice(idx + 1).trim() : decodedTitle;
         const link = field(item, "link");
         if (!link) return null;
         const pubDate = field(item, "pubDate");
@@ -376,7 +379,7 @@ async function weWorkRemotely(query: string): Promise<Job[]> {
         return {
           title,
           company,
-          location: field(item, "region") || "Remote",
+          location: decodeEntities(field(item, "region")) || "Remote",
           description: clean(field(item, "description")),
           applyLink: link,
           source: "WeWorkRemotely",
@@ -464,7 +467,7 @@ const REMOTE = /\b(remote|anywhere|worldwide|distributed|work from home|wfh)\b/;
  * ["bengaluru", "india"]. Two-letter fragments are dropped so a stray "in"
  * doesn't match every job containing the word.
  */
-function locationTokens(location: string): string[] {
+export function locationTokens(location: string): string[] {
   return norm(location)
     .split(" ")
     .map((t) => t.trim())
@@ -479,19 +482,22 @@ function locationTokens(location: string): string[] {
  * listings still score, just below a genuine local match — they are real
  * options for the user, wherever the company sits.
  */
-function locationScore(job: Job, tokens: string[], country: string): number {
+export function locationScore(job: Job, tokens: string[], country: string): number {
   if (!tokens.length) return 0;
   const where = norm(job.location);
   if (!where) return 1;
   if (tokens.some((t) => where.includes(t))) return 12;
-  if (countryCodeFor(job.location) === country && country !== DEFAULT_COUNTRY) return 7;
-  if (REMOTE.test(where)) return 4;
+  if (countryCodeFor(job.location) === country && country !== DEFAULT_COUNTRY) return 8;
   // Adzuna's country endpoint is already scoped, so trust it over the string.
-  if (job.source === "Adzuna") return 7;
+  if (job.source === "Adzuna") return 8;
+  // A fully-remote role is a real option from anywhere, so it sits just under
+  // an in-country one. Scoring it much lower wipes remote boards off the
+  // results entirely the moment the user types a city.
+  if (REMOTE.test(where)) return 7;
   return 0;
 }
 
-function scoreJob(job: Job, skills: string[], tokens: string[], country: string): number {
+export function scoreJob(job: Job, skills: string[], tokens: string[], country: string): number {
   const title = norm(job.title);
   const body = norm(`${job.title} ${job.description}`);
   let score = 0;
@@ -514,14 +520,14 @@ function scoreJob(job: Job, skills: string[], tokens: string[], country: string)
   return score + locationScore(job, tokens, country);
 }
 
-function recent(job: Job, days = 10): boolean {
+export function recent(job: Job, days = 10): boolean {
   if (!job.postedAt) return true;
   const t = Date.parse(job.postedAt);
   if (Number.isNaN(t)) return true;
   return Date.now() - t <= days * 24 * 60 * 60 * 1000;
 }
 
-function dedupe(jobs: Job[]): Job[] {
+export function dedupe(jobs: Job[]): Job[] {
   const seen = new Set<string>();
   return jobs.filter((j) => {
     const k = `${norm(j.company)}|${norm(j.title)}`;
