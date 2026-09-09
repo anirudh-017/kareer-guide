@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -11,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 
 import { Toaster } from "@/components/ui/sonner";
 import { OG_IMAGE, SITE_URL } from "@/lib/seo";
+import { MouseSpotlight } from "@/components/ui/mouse-spotlight";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -96,7 +98,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: OG_IMAGE },
       { name: "robots", content: "index, follow" },
-      { name: "theme-color", content: "#ffffff" },
+      { name: "theme-color", content: "#231a2e" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -104,9 +106,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Manrope:wght@400;450;500;550;600;650;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap",
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.ico", sizes: "any" },
+      { rel: "icon", href: "/favicon.png", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/logo-icon.png" },
     ],
     scripts: [
       {
@@ -131,7 +135,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
               "@id": `${SITE_URL}/#organization`,
               name: "Kareer Guide",
               url: SITE_URL,
-              logo: OG_IMAGE,
+              logo: `${SITE_URL}/logo.png`,
               description:
                 "Kareer Guide matches resumes to live jobs and internships, tailors resumes to job descriptions, and builds AI career roadmaps.",
               areaServed: "IN",
@@ -156,15 +160,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    // Both attributes are deliberately changed before React hydrates: the
-    // no-flash theme script adds `class="dark"` to <html>, and browser
-    // extensions (Grammarly and friends) decorate <body>. Without these,
-    // every dark-mode load logs a hydration mismatch.
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
-      <body suppressHydrationWarning>
+      <body>
         {GTM_ID && (
           <noscript>
             <iframe
@@ -185,11 +185,18 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <div className="site-bg" aria-hidden="true">
+        <div className="site-bg-image" />
+        <div className="site-bg-overlay" />
+      </div>
+      <MouseSpotlight />
+      <div key={pathname} className="page-transition-wrapper">
+        <Outlet />
+      </div>
       <Toaster position="bottom-right" richColors closeButton />
     </QueryClientProvider>
   );

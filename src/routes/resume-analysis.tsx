@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Page } from "@/components/Page";
+import { ScoreCard } from "@/components/ScoreCard";
 import { seo } from "@/lib/seo";
 import { tailorApply } from "@/lib/jobsy.functions";
 import { attachTailoredResume } from "@/lib/savedJobs";
@@ -23,21 +24,9 @@ export const Route = createFileRoute("/resume-analysis")({
   component: AnalysisPage,
 });
 
-function ScoreBadge({ label, value }: { label: string; value: number }) {
-  const color = value >= 80 ? "#16a34a" : value >= 60 ? "#ca8a04" : "#dc2626";
-  return (
-    <div className="card-brutal">
-      <p className="label text-muted-foreground">{label}</p>
-      <p className="mt-1 text-5xl font-black" style={{ color }}>
-        {value}
-      </p>
-    </div>
-  );
-}
-
 function SignalGroup({ title, signals }: { title: string; signals: Signal[] }) {
   return (
-    <div className="bg-background p-6">
+    <div className="card-brutal">
       <p className="label">{title}</p>
       <ul className="mt-4 space-y-4">
         {(signals ?? []).map((s, i) => (
@@ -46,10 +35,20 @@ function SignalGroup({ title, signals }: { title: string; signals: Signal[] }) {
               <span className="text-sm font-bold">{s.name}</span>
               <span className="label">{s.score}</span>
             </div>
-            <div className="mt-1 h-1 w-full bg-muted">
-              <div className="h-1" style={{ width: `${s.score}%`, background: "var(--pink)" }} />
+            <div
+              className="signal-track mt-2"
+              role="progressbar"
+              aria-label={s.name}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.max(0, Math.min(100, s.score))}
+            >
+              <div
+                className="signal-fill"
+                style={{ width: `${Math.max(0, Math.min(100, s.score))}%` }}
+              />
             </div>
-            <p className="mt-2 text-xs text-muted-foreground">{s.note}</p>
+            <p className="mt-2 text-sm text-muted-foreground">{s.note}</p>
           </li>
         ))}
       </ul>
@@ -120,12 +119,12 @@ function AnalysisPage() {
 
   return (
     <Page title="Analysis Review" intro="Approve what you want applied, then generate the rewrite.">
-      <div className="grid gap-px border border-border bg-border md:grid-cols-2">
-        <ScoreBadge label="RESUME SCORE" value={a.score} />
-        <ScoreBadge label="JD FIT SCORE" value={a.fitScore} />
+      <div className="grid gap-4 md:grid-cols-2">
+        <ScoreCard label="RESUME SCORE" value={a.score} />
+        <ScoreCard label="JD FIT SCORE" value={a.fitScore} />
       </div>
 
-      <div className="mt-8 grid gap-px border border-border bg-border md:grid-cols-3">
+      <div className="mt-8 grid gap-4 md:grid-cols-3">
         <SignalGroup title="ATS FIT" signals={a.atsFit} />
         <SignalGroup title="REVIEWER LENS" signals={a.reviewerLens} />
         <SignalGroup title="EXECUTIVE CLARITY" signals={a.executiveClarity} />
@@ -160,13 +159,16 @@ function AnalysisPage() {
       <div className="mt-8 card-brutal">
         <p className="label">MISSING KEYWORDS — TAP TO INCLUDE</p>
         <div className="mt-3 flex flex-wrap gap-2">
-          {(a.missingKeywords ?? []).map((k, i) => (
+          {(a.missingKeywords ?? []).map((k) => (
             <button
-              key={`${i}-${k}`}
+              key={k}
               onClick={() => toggle(keywords, setKeywords, k)}
-              className="label border border-border px-3 py-2"
+              aria-pressed={keywords.includes(k)}
+              className="keyword-chip"
               style={
-                keywords.includes(k) ? { background: "var(--pink)", color: "#000" } : undefined
+                keywords.includes(k)
+                  ? { background: "var(--pink)", color: "var(--accent-foreground)" }
+                  : undefined
               }
             >
               {k}

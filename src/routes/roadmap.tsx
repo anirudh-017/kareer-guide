@@ -19,7 +19,7 @@ import { toast } from "sonner";
 import { Footer } from "@/components/Footer";
 import { Nav } from "@/components/Nav";
 import { DottedField } from "@/components/ui/dotted-field";
-import { Reveal } from "@/components/ui/reveal";
+import { Reveal } from "@/components/Reveal";
 import { seo } from "@/lib/seo";
 import { generateRoadmap } from "@/lib/jobsy.functions";
 import { downloadRoadmapPdf } from "@/lib/roadmapPdf";

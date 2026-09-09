@@ -1,31 +1,24 @@
 import { Link } from "@tanstack/react-router";
-
 const LINKS = [
-  { to: "/recommendations", label: "JOB MATCH" },
-  { to: "/dream-job", label: "DREAM JOB" },
-  { to: "/saved-jobs", label: "SAVED JOBS" },
-  { to: "/tailor-resume", label: "TAILOR RESUME" },
-  { to: "/roadmap", label: "ROADMAP" },
+  { to: "/recommendations", label: "Job match" },
+  { to: "/tailor-resume", label: "Resume studio" },
+  { to: "/roadmap", label: "Career roadmap" },
+  { to: "/saved-jobs", label: "Saved jobs" },
 ] as const;
-
 export function Footer() {
   return (
-    <footer className="mt-24 border-t border-border px-6 py-10 md:px-12">
-      <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+    <footer className="site-footer">
+      <div className="footer-inner">
         <div>
-          <p className="label">KAREER GUIDE — AI JOB SEARCH & CAREER ROADMAPS</p>
-          <p className="label mt-2 text-muted-foreground">
-            © {new Date().getFullYear()} KAREERGUIDE.IN · BUILT FOR STUDENTS & PROFESSIONALS
+          <p className="font-semibold">A clearer way forward.</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            © {new Date().getFullYear()} Kareer Guide
           </p>
         </div>
-        <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2">
-          {LINKS.map((l) => (
-            <Link
-              key={l.to}
-              to={l.to}
-              className="label text-muted-foreground hover:text-foreground"
-            >
-              {l.label}
+        <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-3">
+          {LINKS.map((link) => (
+            <Link key={link.to} to={link.to} className="footer-link">
+              {link.label}
             </Link>
           ))}
         </nav>

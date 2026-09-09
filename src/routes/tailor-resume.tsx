@@ -1,10 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Upload } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Page } from "@/components/Page";
+import { ResumeUpload } from "@/components/ResumeUpload";
+import { WorkflowAside } from "@/components/WorkflowAside";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { seo } from "@/lib/seo";
 import { tailorAnalyze } from "@/lib/jobsy.functions";
 import { extractResumeText } from "@/lib/resumeParse";
@@ -87,6 +90,7 @@ function TailorResume() {
   const [companyProfile, setCompanyProfile] = useState<string>(PROFILES[0]);
   const [jobMeta, setJobMeta] = useState<TailorHandoff | null>(null);
   const [busy, setBusy] = useState(false);
+  const [reading, setReading] = useState(false);
   const autoStarted = useRef(false);
 
   const analyze = useCallback(
@@ -145,110 +149,149 @@ function TailorResume() {
   }, [analyze]);
 
   async function handleFile(file: File) {
+    setReading(true);
+    setResumeText("");
+    setFileName("");
     try {
       const text = await extractResumeText(file);
+      if (text.length < 50) throw new Error("Could not read enough text from that file");
       setResumeText(text);
       setFileName(file.name);
       toast.success("Resume loaded");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not read that file");
+    } finally {
+      setReading(false);
     }
   }
 
   return (
     <Page
-      title="Tailor Resume"
-      intro="A recruiter-grade review of your resume against a specific job, then a rewrite that keeps every fact true."
+      title="Your resume, refined."
+      intro="A focused review for the role you want. Bring out your strengths, improve the fit, and keep every fact true."
     >
       {jobMeta && (
         <div className="card-brutal mb-6">
-          <p className="label text-muted-foreground">TAILORING FOR</p>
-          <p className="mt-1 font-bold">
-            {jobMeta.title} — {jobMeta.company}
+          <p className="eyebrow">Tailoring for</p>
+          <p className="mt-2 text-lg font-semibold">
+            {jobMeta.title} · {jobMeta.company}
           </p>
-          <p className="label mt-1 text-muted-foreground">{jobMeta.location}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{jobMeta.location}</p>
         </div>
       )}
-
-      <div className="grid gap-6 md:grid-cols-2">
-        <div>
-          <p className="label mb-2">TARGET REGION</p>
-          <select
-            className="input-brutal"
-            value={region}
-            onChange={(e) => setRegion(e.target.value)}
-          >
-            {REGIONS.map((r) => (
-              <option key={r}>{r}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <p className="label mb-2">COMPANY PROFILE</p>
-          <select
-            className="input-brutal"
-            value={companyProfile}
-            onChange={(e) => setCompanyProfile(e.target.value)}
-          >
-            {PROFILES.map((p) => (
-              <option key={p}>{p}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div className="mt-8 flex">
-        {(["upload", "paste"] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`btn-brutal -ml-px ${tab === t ? "bg-foreground text-background" : ""}`}
-          >
-            <span className="relative z-10">{t === "upload" ? "UPLOAD FILE" : "PASTE TEXT"}</span>
-          </button>
-        ))}
-      </div>
-
-      <div className="card-brutal mt-6">
-        {tab === "upload" ? (
-          <label className="flex cursor-pointer flex-col items-center gap-3 border border-dashed border-border p-10 text-center">
-            <Upload className="h-6 w-6" />
-            <span className="label">{fileName || "PDF, DOCX OR TXT · MAX 10MB"}</span>
-            <input
-              type="file"
-              accept=".pdf,.docx,.txt"
-              className="hidden"
-              onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
-            />
-          </label>
-        ) : (
-          <textarea
-            className="input-brutal h-56"
-            placeholder="Paste your resume text here…"
-            value={resumeText}
-            onChange={(e) => setResumeText(e.target.value)}
-          />
-        )}
-
-        <p className="label mb-2 mt-6">JOB DESCRIPTION (OPTIONAL — UNLOCKS JD FIT SCORE)</p>
-        <textarea
-          className="input-brutal h-40"
-          placeholder="Paste the job description…"
-          value={jobDescription}
-          onChange={(e) => setJobDescription(e.target.value)}
-        />
-
-        <button
-          disabled={busy}
-          className="btn-brutal mt-6 w-full disabled:opacity-60"
-          onClick={() => analyze(resumeText, jobDescription, jobMeta)}
+      <div className="form-layout">
+        <form
+          className="card-brutal"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void analyze(resumeText, jobDescription, jobMeta);
+          }}
+          aria-busy={busy || reading}
         >
-          <span className="relative z-10 flex items-center gap-2">
-            {busy && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-            {busy ? "ANALYZING…" : "ANALYZE DOCUMENT"}
-          </span>
-          <span className="nav-fill" />
-        </button>
+          <fieldset disabled={busy || reading} className="min-w-0">
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label htmlFor="tailor-region" className="field-label">
+                  Target region
+                </label>
+                <select
+                  id="tailor-region"
+                  className="input-brutal"
+                  value={region}
+                  onChange={(event) => setRegion(event.target.value)}
+                >
+                  {REGIONS.map((region) => (
+                    <option key={region}>{region}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="tailor-profile" className="field-label">
+                  Company profile
+                </label>
+                <select
+                  id="tailor-profile"
+                  className="input-brutal"
+                  value={companyProfile}
+                  onChange={(event) => setCompanyProfile(event.target.value)}
+                >
+                  {PROFILES.map((profile) => (
+                    <option key={profile}>{profile}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <Tabs
+              value={tab}
+              onValueChange={(value) => setTab(value as "upload" | "paste")}
+              className="mt-6"
+            >
+              <TabsList className="form-tabs" aria-label="Resume input">
+                <TabsTrigger value="upload">Upload file</TabsTrigger>
+                <TabsTrigger value="paste">Paste text</TabsTrigger>
+              </TabsList>
+              <TabsContent value="upload" className="mt-5">
+                <ResumeUpload
+                  fileName={fileName}
+                  reading={reading}
+                  disabled={busy}
+                  onFile={handleFile}
+                />
+              </TabsContent>
+              <TabsContent value="paste" className="mt-5">
+                <label htmlFor="resume-text" className="field-label">
+                  Your resume
+                </label>
+                <textarea
+                  id="resume-text"
+                  className="input-brutal min-h-56"
+                  placeholder="Paste your resume text here…"
+                  value={resumeText}
+                  onChange={(event) => setResumeText(event.target.value)}
+                />
+              </TabsContent>
+            </Tabs>
+            <label htmlFor="job-description" className="field-label mt-6">
+              Job description <span>(optional)</span>
+            </label>
+            <textarea
+              id="job-description"
+              className="input-brutal min-h-40"
+              placeholder="Paste the job description you want to tailor your resume to…"
+              value={jobDescription}
+              onChange={(event) => setJobDescription(event.target.value)}
+              aria-describedby="jd-help"
+            />
+            <p id="jd-help" className="mt-2 text-sm text-muted-foreground">
+              Add a job description to see how closely your resume fits.
+            </p>
+          </fieldset>
+          <button type="submit" disabled={busy || reading} className="btn-brutal mt-6 w-full">
+            <span className="relative z-10 flex items-center gap-2">
+              {busy ? <Loader2 size={18} className="animate-spin" /> : <ArrowRight size={18} />}
+              {busy ? "Reviewing your resume…" : "Review my resume"}
+            </span>
+            <span className="nav-fill" />
+          </button>
+          <div role="status" aria-live="polite">
+            {(busy || reading) && (
+              <p className="status-message">
+                {reading
+                  ? "Reading your file…"
+                  : "Checking your experience, keywords, and fit. This may take a minute."}
+              </p>
+            )}
+          </div>
+        </form>
+        <WorkflowAside
+          title="Your story. Sharper focus."
+          steps={[
+            "Upload your resume and add the role you’re aiming for.",
+            "Review your score, hiring signals, and suggested edits.",
+            "Approve the changes and download your tailored resume.",
+          ]}
+          note="Your resume text and job description are sent for AI analysis when you request a review."
+        />
       </div>
     </Page>
   );

@@ -189,7 +189,7 @@ function Recommendations() {
       intro="Upload your resume or select skills — we'll find real jobs from LinkedIn, Naukri, Internshala & more."
     >
       {/* Source of skills */}
-      <div className="grid gap-px border border-border bg-border sm:grid-cols-2">
+      <div className="inline-flex rounded-full border border-[#70798c]/35 bg-background/80 p-1.5 backdrop-blur-md shadow-sm gap-1">
         {(
           [
             { value: "resume", label: "UPLOAD RESUME", icon: Upload },
@@ -200,22 +200,24 @@ function Recommendations() {
             key={value}
             onClick={() => setMode(value)}
             aria-pressed={mode === value}
-            className={`flex items-center justify-center gap-3 px-6 py-5 text-sm font-semibold tracking-wider ${
+            className={`btn-standard flex items-center gap-2 rounded-full px-5 py-2 font-mono text-xs font-semibold tracking-wider transition-all duration-200 ${
               mode === value
-                ? "bg-foreground text-background"
-                : "bg-background text-muted-foreground hover:text-foreground"
+                ? "bg-[#dad2bc] text-[#252323] font-bold shadow-sm"
+                : "text-muted-foreground hover:text-foreground hover:bg-[#70798c]/15"
             }`}
           >
-            <Icon className="h-4 w-4" />
+            <Icon className="h-3.5 w-3.5" />
             {label}
           </button>
         ))}
       </div>
 
       {mode === "resume" && (
-        <label className="mt-8 flex cursor-pointer flex-col items-center gap-3 border border-dashed border-border p-10 text-center">
-          <Upload className="h-6 w-6" />
-          <span className="label">{fileName || "CHOOSE PDF, DOCX OR TXT (MAX 10MB)"}</span>
+        <label className="mt-8 flex cursor-pointer flex-col items-center gap-3 rounded-2xl border border-dashed border-[#70798c]/40 bg-card/40 p-10 text-center transition-colors hover:border-[#dad2bc]/70 hover:bg-[#dad2bc]/5">
+          <Upload className="h-6 w-6 text-[#dad2bc]" />
+          <span className="font-mono text-xs font-semibold tracking-wider text-foreground">
+            {fileName || "CHOOSE PDF, DOCX OR TXT (MAX 10MB)"}
+          </span>
           <input
             type="file"
             accept=".pdf,.docx,.txt"
@@ -226,17 +228,17 @@ function Recommendations() {
       )}
 
       {/* Role type */}
-      <p className="label mt-8 text-muted-foreground">WHAT TYPE OF ROLE?</p>
+      <p className="mt-8 font-mono text-xs font-semibold tracking-wider text-[#a99985]">WHAT TYPE OF ROLE?</p>
       <div className="mt-3 flex flex-wrap gap-2">
         {ROLE_TYPES.map((r) => (
           <button
             key={r.value}
             onClick={() => setRoleType(r.value)}
             aria-pressed={roleType === r.value}
-            className={`border border-border px-5 py-3 text-sm tracking-wider ${
+            className={`btn-standard rounded-full border px-5 py-2 font-mono text-xs tracking-wider transition-all ${
               roleType === r.value
-                ? "bg-foreground font-bold text-background"
-                : "text-muted-foreground hover:text-foreground"
+                ? "border-[#dad2bc] bg-[#dad2bc] font-bold text-[#252323] shadow-sm"
+                : "border-border/40 bg-background/50 text-muted-foreground hover:border-[#dad2bc]/40 hover:text-foreground"
             }`}
           >
             {r.label}
@@ -245,34 +247,31 @@ function Recommendations() {
       </div>
 
       {/* Location */}
-      <p className="label mt-8 text-muted-foreground">YOUR LOCATION (FOR NEARBY JOBS)</p>
-      <div className="mt-3 flex">
+      <p className="mt-8 font-mono text-xs font-semibold tracking-wider text-[#a99985]">YOUR LOCATION (FOR NEARBY JOBS)</p>
+      <div className="mt-3 flex gap-2">
         <input
-          className="input-brutal px-5 py-4 text-base"
+          className="flex-1 rounded-xl border border-border/40 bg-background/60 px-4 py-3 font-mono text-xs text-foreground focus:border-[#dad2bc] focus:outline-none"
           placeholder="Bengaluru, India"
           aria-label="Your location"
           value={location}
           onChange={(e) => setLocation(e.target.value)}
         />
         <button
-          className="btn-brutal -ml-px shrink-0 px-5"
+          className="btn-standard flex items-center justify-center rounded-xl border border-border/40 bg-background/60 px-4 text-muted-foreground transition-all hover:border-[#dad2bc]/60 hover:text-foreground"
           onClick={detectLocation}
           aria-label="Detect my location"
           title="Detect my location"
         >
-          <span className="relative z-10">
-            <MapPin className="h-4 w-4" />
-          </span>
-          <span className="nav-fill" />
+          <MapPin className="h-4 w-4 text-[#dad2bc]" />
         </button>
       </div>
 
       {mode === "skills" && (
         <>
           {/* Skill entry */}
-          <div className="mt-6 flex">
+          <div className="mt-6 flex gap-2">
             <input
-              className="input-brutal px-5 py-4 text-base"
+              className="flex-1 rounded-xl border border-border/40 bg-background/60 px-4 py-3 font-mono text-xs text-foreground focus:border-[#dad2bc] focus:outline-none"
               placeholder="Type a skill and press Enter…"
               aria-label="Add a skill"
               value={skillInput}
@@ -285,15 +284,12 @@ function Recommendations() {
               }}
             />
             <button
-              className="btn-brutal -ml-px shrink-0 px-5"
+              className="btn-standard flex items-center justify-center rounded-xl border border-border/40 bg-[#dad2bc]/20 px-5 text-foreground transition-all hover:bg-[#dad2bc]/30 hover:border-[#dad2bc]/60"
               onClick={() => addSkill(skillInput)}
               aria-label="Add skill"
               title="Add skill"
             >
-              <span className="relative z-10">
-                <Plus className="h-4 w-4" />
-              </span>
-              <span className="nav-fill" />
+              <Plus className="h-4 w-4 text-[#dad2bc]" />
             </button>
           </div>
 
@@ -302,11 +298,10 @@ function Recommendations() {
               {skills.map((s) => (
                 <span
                   key={s}
-                  className="label flex items-center gap-2 border border-border px-3 py-2"
-                  style={{ background: "var(--pink)", color: "#000" }}
+                  className="flex items-center gap-2 rounded-lg bg-[#dad2bc] px-3 py-1.5 font-mono text-xs font-semibold text-[#252323] shadow-sm"
                 >
                   {s}
-                  <button onClick={() => removeSkill(s)} aria-label={`Remove ${s}`}>
+                  <button onClick={() => removeSkill(s)} aria-label={`Remove ${s}`} className="hover:opacity-75">
                     <X className="h-3 w-3" />
                   </button>
                 </span>
@@ -314,7 +309,7 @@ function Recommendations() {
             </div>
           )}
 
-          <p className="label mt-8 text-muted-foreground">POPULAR SKILLS</p>
+          <p className="mt-8 font-mono text-xs font-semibold tracking-wider text-[#a99985]">POPULAR SKILLS</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {POPULAR_SKILLS.filter(
               (s) => !skills.some((x) => x.toLowerCase() === s.toLowerCase()),
@@ -322,7 +317,7 @@ function Recommendations() {
               <button
                 key={s}
                 onClick={() => addSkill(s)}
-                className="border border-border px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                className="btn-standard rounded-full border border-border/40 bg-background/40 px-3.5 py-1.5 font-mono text-xs text-muted-foreground transition-colors hover:border-[#dad2bc]/60 hover:text-foreground"
               >
                 {s}
               </button>
@@ -333,14 +328,11 @@ function Recommendations() {
 
       <button
         disabled={busy}
-        className="btn-brutal mt-10 w-full py-5 disabled:cursor-not-allowed disabled:opacity-50"
+        className="btn-standard mt-10 flex w-full items-center justify-center gap-2 rounded-xl bg-[#dad2bc] py-4 font-mono text-xs font-bold tracking-wider text-[#252323] shadow-lg transition-all hover:bg-[#dad2bc]/90 hover:shadow-xl disabled:opacity-50"
         onClick={submit}
       >
-        <span className="relative z-10 flex items-center gap-3 text-sm">
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-          {busy ? status || "WORKING…" : "FIND JOBS"}
-        </span>
-        {!busy && <span className="nav-fill" />}
+        {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+        <span>{busy ? status || "WORKING…" : "FIND MY JOBS"}</span>
       </button>
     </Page>
   );

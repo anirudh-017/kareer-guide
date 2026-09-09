@@ -1,134 +1,142 @@
-import { Link } from "@tanstack/react-router";
-import { Moon, Sun } from "lucide-react";
+import { Link, useRouterState } from "@tanstack/react-router";
+import { ArrowUpRight, Menu, Moon, Sun, Target } from "lucide-react";
 import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 const LINKS = [
-  { to: "/", label: "KAREER GUIDE" },
-  { to: "/recommendations", label: "JOB MATCH" },
-  { to: "/dream-job", label: "🎯 DREAM JOB" },
-  { to: "/saved-jobs", label: "SAVED JOBS" },
-  { to: "/tailor-resume", label: "TAILOR RESUME" },
-  { to: "/roadmap", label: "ROADMAP" },
+  { to: "/roadmap", label: "Career roadmap", detail: "Step-by-step path to your target role" },
+  { to: "/dream-job", label: "Dream job", detail: "Target top companies & gap analysis" },
+  { to: "/recommendations", label: "Job match", detail: "Live jobs & internships tailored to you" },
+  { to: "/tailor-resume", label: "Resume studio", detail: "Tailor your resume for ATS success" },
+  { to: "/saved-jobs", label: "Saved jobs", detail: "Keep your saved roles and plans" },
 ] as const;
+
+export function Brand() {
+  return (
+    <Link to="/" className="brand" aria-label="Kareer Guide home">
+      <img
+        src="/logo-icon.png"
+        alt="Kareer Guide"
+        width="36"
+        height="36"
+        className="brand-logo-img"
+      />
+      <span className="brand-name">
+        Kareer<span className="brand-light">Guide</span>
+        <span className="brand-period">.</span>
+      </span>
+    </Link>
+  );
+}
 
 function ThemeToggle() {
   const [dark, setDark] = useState(false);
-
-  useEffect(() => {
-    setDark(document.documentElement.classList.contains("dark"));
-  }, []);
-
-  const toggle = () => {
-    const next = !dark;
-    setDark(next);
-    document.documentElement.classList.toggle("dark", next);
-    localStorage.setItem("kg-theme", next ? "dark" : "light");
-  };
-
+  useEffect(() => setDark(document.documentElement.classList.contains("dark")), []);
   return (
-    <button onClick={toggle} className="nav-box" aria-label="Toggle dark mode">
-      <span className="nav-fill" />
-      <span className="relative z-10 flex items-center">
-        {dark ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
-      </span>
+    <button
+      type="button"
+      className="theme-toggle"
+      aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}
+      onClick={() => {
+        const next = !dark;
+        document.documentElement.classList.toggle("dark", next);
+        document.documentElement.style.colorScheme = next ? "dark" : "light";
+        setDark(next);
+        try {
+          localStorage.setItem("kg-theme", next ? "dark" : "light");
+        } catch {
+          /* The toggle still works with storage blocked. */
+        }
+      }}
+    >
+      {dark ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}
     </button>
   );
 }
 
-function NavInner({ mobileOnly }: { mobileOnly: boolean }) {
+export function Nav() {
   const [open, setOpen] = useState(false);
-
-  // A full-screen overlay that traps neither Escape nor the page scroll feels
-  // broken on mobile — you can scroll the page behind it and have no key out.
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
-
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const active = (to: string) =>
+    pathname === to ||
+    (to === "/roadmap" && pathname.startsWith("/roadmap")) ||
+    (to === "/dream-job" && pathname.startsWith("/dream-job")) ||
+    (to === "/recommendations" && pathname === "/jobs") ||
+    (to === "/tailor-resume" && ["/resume-analysis", "/tailored-resume"].includes(pathname));
+  useEffect(() => setOpen(false), [pathname]);
   return (
     <>
-      {!mobileOnly && (
-        <nav
-          aria-label="Primary"
-          className="fixed left-4 top-4 z-50 hidden md:left-8 md:top-8 md:flex"
-        >
-          <ThemeToggle />
-          {LINKS.map((l) => (
-            <Link key={l.to} to={l.to} className="nav-box -ml-px">
-              <span className="nav-fill" />
-              <span className="relative z-10">{l.label}</span>
-            </Link>
-          ))}
-        </nav>
-      )}
-
-      <div className="fixed left-4 top-4 z-50 flex md:hidden">
-        <ThemeToggle />
-        <button
-          className="nav-box -ml-px"
-          onClick={() => setOpen(true)}
-          aria-expanded={open}
-          aria-haspopup="dialog"
-        >
-          <span className="nav-fill" />
-          <span className="relative z-10">MENU</span>
-        </button>
-      </div>
-
-      {open && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Menu"
-          className="fixed inset-0 z-[60] flex flex-col items-start justify-center gap-2 bg-background px-6"
-        >
-          <button
-            className="nav-box absolute right-4 top-4"
-            onClick={() => setOpen(false)}
-            aria-label="Close menu"
-          >
-            <span className="relative z-10">CLOSE</span>
-          </button>
-          {LINKS.map((l, i) => (
-            <Link
-              key={l.to}
-              to={l.to}
-              onClick={() => setOpen(false)}
-              className="menu-item text-3xl font-bold tracking-tight"
-              style={{ animationDelay: `${i * 60}ms` }}
-            >
-              {l.label}
-            </Link>
-          ))}
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
+      <header className="site-header">
+        <div className="header-inner">
+          <Brand />
+          <nav className="desktop-nav" aria-label="Primary">
+            {LINKS.map((link, index) => {
+              const isFirstThree = index < 3;
+              const isActive = active(link.to);
+              return (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={`nav-link ${isFirstThree ? "nav-link-trio" : ""}`}
+                  data-active={isActive}
+                  aria-current={isActive ? "page" : undefined}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </nav>
+          <div className="header-actions">
+            <ThemeToggle />
+            <Sheet open={open} onOpenChange={setOpen}>
+              <SheetTrigger asChild>
+                <button
+                  type="button"
+                  className="theme-toggle mobile-menu-trigger"
+                  aria-label="Open navigation"
+                >
+                  <Menu size={21} />
+                </button>
+              </SheetTrigger>
+              <SheetContent className="mobile-menu w-[min(90vw,26rem)] sm:max-w-none">
+                <SheetTitle className="mb-2 mt-8 text-2xl">Your next move.</SheetTitle>
+                <SheetDescription>Choose where you want to begin.</SheetDescription>
+                <nav aria-label="Mobile" className="mt-10 flex flex-col gap-2">
+                  <Link to="/" onClick={() => setOpen(false)} className="mobile-nav-link">
+                    Home <ArrowUpRight size={18} />
+                  </Link>
+                  {LINKS.map((link, index) => (
+                    <Link
+                      key={link.to}
+                      to={link.to}
+                      onClick={() => setOpen(false)}
+                      className="mobile-nav-link menu-item"
+                      data-active={active(link.to)}
+                      aria-current={active(link.to) ? "page" : undefined}
+                      style={{ animationDelay: `${index * 45}ms` }}
+                    >
+                      <span>
+                        {link.label}
+                        <small>{link.detail}</small>
+                      </span>
+                      <ArrowUpRight size={18} />
+                    </Link>
+                  ))}
+                </nav>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
-      )}
+      </header>
     </>
   );
-}
-
-/**
- * @param mobileOnly Hide the fixed desktop bar, keeping the mobile toggle and
- * MENU overlay. Used by pages that render their own header — the mobile
- * navigation and theme toggle still have to come from somewhere.
- */
-export function Nav({ mobileOnly = false }: { mobileOnly?: boolean } = {}) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
-  // There is no document.body to portal into during SSR. Rendering the nav in
-  // place instead of null keeps every internal link in the server HTML — which
-  // is what crawlers follow — and the first client render matches it exactly,
-  // so hydration stays clean. Once mounted we hand off to the portal.
-  if (!mounted) return <NavInner mobileOnly={mobileOnly} />;
-  return createPortal(<NavInner mobileOnly={mobileOnly} />, document.body);
 }

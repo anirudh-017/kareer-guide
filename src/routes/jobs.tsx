@@ -1,10 +1,9 @@
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Bookmark, ExternalLink, FileText } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { toast } from "sonner";
 
 import { Page } from "@/components/Page";
-import { experienceOf, matchesLocation, typeOf } from "@/lib/jobFilters";
 import { saveJob } from "@/lib/savedJobs";
 import { seo } from "@/lib/seo";
 import { SK, readJson, writeJson } from "@/lib/session";
@@ -26,6 +25,21 @@ export const Route = createFileRoute("/jobs")({
     }),
   component: Jobs,
 });
+
+function experienceOf(job: Job): "entry" | "mid" | "senior" {
+  const t = `${job.title} ${job.description}`.toLowerCase();
+  if (/\b(senior|sr\.|lead|principal|staff|head of|manager|architect)\b/.test(t)) return "senior";
+  if (/\b(intern|internship|trainee|fresher|graduate|entry[- ]level|junior|jr\.)\b/.test(t))
+    return "entry";
+  return "mid";
+}
+
+function typeOf(job: Job): string {
+  const t = `${job.jobType} ${job.title}`.toLowerCase();
+  if (t.includes("intern")) return "internship";
+  if (t.includes("remote")) return "remote";
+  return "full-time";
+}
 
 /** How many cards to render before "show more" — the full set can top 100. */
 const PAGE_SIZE = 24;
@@ -61,7 +75,7 @@ function Jobs() {
     const out = jobs.filter((j) => {
       if (q && !`${j.title} ${j.company} ${j.description}`.toLowerCase().includes(q.toLowerCase()))
         return false;
-      if (loc && !matchesLocation(j.location, loc)) return false;
+      if (loc && !j.location.toLowerCase().includes(loc.toLowerCase())) return false;
       if (type !== "all" && typeOf(j) !== type) return false;
       if (exp !== "all" && experienceOf(j) !== exp) return false;
       if (source !== "all" && j.source !== source) return false;
@@ -101,11 +115,14 @@ function Jobs() {
   }
 
   return (
-    <Page title="Job Results" intro="Freshest matches first. Nothing older than 10 days.">
+    <Page
+      title="Your next possibilities."
+      intro="Explore your matches, refine the results, and save the roles worth a closer look."
+    >
       {!loaded ? (
-        <div className="grid gap-px border border-border bg-border md:grid-cols-2" aria-busy="true">
+        <div className="results-grid" aria-busy="true">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="space-y-3 bg-background p-6">
+            <div key={i} className="card-brutal space-y-3">
               <div className="h-2 w-24 animate-pulse bg-muted" />
               <div className="h-5 w-3/4 animate-pulse bg-muted" />
               <div className="h-3 w-1/3 animate-pulse bg-muted" />
@@ -116,18 +133,18 @@ function Jobs() {
           <span className="sr-only">Loading your job matches</span>
         </div>
       ) : jobs.length === 0 ? (
-        <div>
+        <div className="card-brutal empty-state">
           <p className="text-sm text-muted-foreground">
             No search yet — head to Job Match and upload your resume or enter your skills.
           </p>
-          <Link to="/recommendations" className="btn-brutal mt-6">
+          <Link to="/recommendations" className="btn-brutal button-primary mt-6">
             <span className="relative z-10">GO TO JOB MATCH</span>
             <span className="nav-fill" />
           </Link>
         </div>
       ) : (
         <>
-          <div className="grid gap-px border border-border bg-border md:grid-cols-3 lg:grid-cols-6">
+          <div className="filter-panel">
             <input
               className="input-brutal border-0"
               placeholder="SEARCH"
@@ -151,7 +168,6 @@ function Jobs() {
               <option value="all">ALL TYPES</option>
               <option value="full-time">FULL-TIME</option>
               <option value="internship">INTERNSHIP</option>
-              <option value="part-time">PART-TIME</option>
               <option value="remote">REMOTE</option>
             </select>
             <select
@@ -208,9 +224,13 @@ function Jobs() {
             </div>
           )}
 
-          <div className="mt-6 grid gap-px border border-border bg-border md:grid-cols-2">
+          <div className="results-grid mt-6">
             {visible.map((job, i) => (
-              <article key={`${job.applyLink}-${i}`} className="flex flex-col bg-background p-6">
+              <article
+                key={`${job.applyLink}-${i}`}
+                className="result-card"
+                style={{ "--result-index": i } as CSSProperties}
+              >
                 <p className="label text-muted-foreground">
                   {job.source.toUpperCase()}
                   <span className="hidden sm:inline">
@@ -223,7 +243,7 @@ function Jobs() {
                   {job.location || "NOT SPECIFIED"}
                 </p>
                 <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">{job.description}</p>
-                <div className="mt-auto flex flex-wrap gap-px pt-5">
+                <div className="result-actions">
                   <a href={job.applyLink} target="_blank" rel="noreferrer" className="btn-brutal">
                     <span className="relative z-10 flex items-center gap-2">
                       APPLY NOW <ExternalLink className="h-3 w-3" />

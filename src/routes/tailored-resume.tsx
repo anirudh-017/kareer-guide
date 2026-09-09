@@ -3,6 +3,7 @@ import { Download, ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Page } from "@/components/Page";
+import { ScoreCard } from "@/components/ScoreCard";
 import { seo } from "@/lib/seo";
 import { SK, readJson } from "@/lib/session";
 
@@ -24,18 +25,6 @@ type Result = {
   fitScore: number;
   job?: { title?: string; company?: string; applyLink?: string } | null;
 };
-
-function Badge({ label, value }: { label: string; value: number }) {
-  const color = value >= 80 ? "#16a34a" : value >= 60 ? "#ca8a04" : "#dc2626";
-  return (
-    <div className="bg-background p-6">
-      <p className="label text-muted-foreground">{label}</p>
-      <p className="mt-1 text-4xl font-black" style={{ color }}>
-        {value}
-      </p>
-    </div>
-  );
-}
 
 function TailoredResume() {
   const [r, setR] = useState<Result | null>(null);
@@ -86,12 +75,12 @@ function TailoredResume() {
 
   return (
     <Page title="Tailored Resume" intro="Rewritten for the role, scored, and ready to send.">
-      <div className="grid gap-px border border-border bg-border md:grid-cols-2">
-        <Badge label="RESUME SCORE" value={r.score} />
-        <Badge label="JD FIT SCORE" value={r.fitScore} />
+      <div className="grid gap-4 md:grid-cols-2">
+        <ScoreCard label="RESUME SCORE" value={r.score} />
+        <ScoreCard label="JD FIT SCORE" value={r.fitScore} />
       </div>
 
-      <div className="mt-6 flex flex-wrap gap-px">
+      <div className="mt-6 flex flex-wrap gap-2">
         <button className="btn-brutal" onClick={downloadTxt}>
           <span className="relative z-10 flex items-center gap-2">
             <Download className="h-3 w-3" /> DOWNLOAD .TXT
@@ -115,7 +104,7 @@ function TailoredResume() {
         )}
       </div>
 
-      <pre className="card-brutal mt-6 whitespace-pre-wrap font-mono text-[13px] leading-relaxed">
+      <pre className="card-brutal mt-6 whitespace-pre-wrap break-words font-mono text-sm leading-relaxed">
         {r.tailoredResume}
       </pre>
     </Page>

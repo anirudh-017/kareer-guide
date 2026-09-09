@@ -1,6 +1,6 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ExternalLink, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { ArrowRight, Bookmark, ExternalLink, Trash2 } from "lucide-react";
+import { useEffect, useState, type CSSProperties } from "react";
 
 import { Page } from "@/components/Page";
 import { seo } from "@/lib/seo";
@@ -23,9 +23,13 @@ export const Route = createFileRoute("/saved-jobs")({
 function SavedJobsPage() {
   const navigate = useNavigate();
   const [jobs, setJobs] = useState<SavedJob[]>([]);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    const sync = () => setJobs(getSavedJobs());
+    const sync = () => {
+      setJobs(getSavedJobs());
+      setLoaded(true);
+    };
     sync();
     window.addEventListener("kg-saved-jobs", sync);
     return () => window.removeEventListener("kg-saved-jobs", sync);
@@ -54,23 +58,49 @@ function SavedJobsPage() {
   }
 
   return (
-    <Page title="Saved Jobs" intro="Kept on this device only. No account, no sync, no tracking.">
-      {jobs.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Nothing saved yet.</p>
+    <Page
+      title="Keep your options open."
+      intro="Your shortlisted roles and tailored resumes, saved in this browser on this device."
+    >
+      {!loaded ? (
+        <div className="card-brutal" role="status">
+          Loading saved jobs…
+        </div>
+      ) : jobs.length === 0 ? (
+        <div className="card-brutal empty-state">
+          <span className="empty-icon">
+            <Bookmark size={28} strokeWidth={1.5} />
+          </span>
+          <h2>A little space for big possibilities.</h2>
+          <p>
+            Save a role from your job matches. It will be here when you’re ready to take the next
+            step.
+          </p>
+          <Link to="/recommendations" className="btn-brutal button-primary mt-6">
+            <span className="relative z-10 flex items-center gap-2">
+              Find my matches <ArrowRight size={16} />
+            </span>
+            <span className="nav-fill" />
+          </Link>
+        </div>
       ) : (
-        <div className="grid gap-px border border-border bg-border md:grid-cols-2">
-          {jobs.map((job) => (
-            <article key={job.id} className="flex flex-col bg-background p-6">
+        <div className="results-grid">
+          {jobs.map((job, index) => (
+            <article
+              key={job.id}
+              className="result-card"
+              style={{ "--result-index": index } as CSSProperties}
+            >
               <p className="label text-muted-foreground">{job.source.toUpperCase()}</p>
               <h2 className="mt-2 text-lg font-bold leading-tight">{job.title}</h2>
               <p className="mt-1 text-sm">{job.company}</p>
               <p className="label mt-1 text-muted-foreground">{job.location}</p>
               {job.tailoredResume && (
-                <p className="label mt-3" style={{ color: "var(--pink)" }}>
+                <p className="resume-ready mt-3">
                   TAILORED RESUME READY · SCORE {job.tailoredScore}
                 </p>
               )}
-              <div className="mt-auto flex flex-wrap gap-px pt-5">
+              <div className="result-actions">
                 <a href={job.applyLink} target="_blank" rel="noreferrer" className="btn-brutal">
                   <span className="relative z-10 flex items-center gap-2">
                     APPLY NOW <ExternalLink className="h-3 w-3" />
