@@ -12,4 +12,13 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    build: {
+      // pdfjs-dist's Node path optionally requires "canvas" to rasterise pages.
+      // We only ever call it in the browser (resumeParse.ts extracts text), but
+      // it still lands in the SSR graph, where the unresolved import fails the
+      // build. Externalising leaves the require in place and unreached.
+      rolldownOptions: { external: ["canvas"] },
+    },
+  },
 });

@@ -9,8 +9,14 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
+import { Toaster } from "@/components/ui/sonner";
+import { OG_IMAGE, SITE_URL } from "@/lib/seo";
+
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+
+/** Optional analytics: inert until VITE_GTM_ID is set (see .env.example). */
+const GTM_ID = import.meta.env["VITE_GTM_ID"] as string | undefined;
 
 function NotFoundComponent() {
   return (
@@ -85,7 +91,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:site_name", content: "Kareer Guide" },
       { property: "og:type", content: "website" },
+      { property: "og:locale", content: "en_IN" },
+      { property: "og:image", content: OG_IMAGE },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: OG_IMAGE },
+      { name: "robots", content: "index, follow" },
+      { name: "theme-color", content: "#ffffff" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -105,11 +116,36 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         type: "application/ld+json",
         children: JSON.stringify({
           "@context": "https://schema.org",
-          "@type": "WebSite",
-          name: "Kareer Guide",
-          description: "AI job search, resume tailoring and career roadmaps.",
+          "@graph": [
+            {
+              "@type": "WebSite",
+              "@id": `${SITE_URL}/#website`,
+              url: SITE_URL,
+              name: "Kareer Guide",
+              description: "AI job search, resume tailoring and career roadmaps.",
+              inLanguage: "en-IN",
+              publisher: { "@id": `${SITE_URL}/#organization` },
+            },
+            {
+              "@type": "Organization",
+              "@id": `${SITE_URL}/#organization`,
+              name: "Kareer Guide",
+              url: SITE_URL,
+              logo: OG_IMAGE,
+              description:
+                "Kareer Guide matches resumes to live jobs and internships, tailors resumes to job descriptions, and builds AI career roadmaps.",
+              areaServed: "IN",
+            },
+          ],
         }),
       },
+      ...(GTM_ID
+        ? [
+            {
+              children: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${GTM_ID}');`,
+            },
+          ]
+        : []),
     ],
   }),
   shellComponent: RootShell,
@@ -125,6 +161,17 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        {GTM_ID && (
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+              title="Google Tag Manager"
+            />
+          </noscript>
+        )}
         {children}
         <Scripts />
       </body>
@@ -139,6 +186,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <Toaster position="bottom-right" richColors closeButton />
     </QueryClientProvider>
   );
 }

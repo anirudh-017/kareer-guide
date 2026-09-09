@@ -5,26 +5,36 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { Page } from "@/components/Page";
+import { seo } from "@/lib/seo";
 import { analyzeResume, searchJobs } from "@/lib/jobsy.functions";
+import { countryCodeFor } from "@/lib/countries";
 import { extractResumeText } from "@/lib/resumeParse";
+import { SK, writeJson } from "@/lib/session";
 
 export const Route = createFileRoute("/recommendations")({
-  head: () => ({
-    meta: [
-      { title: "Job Match — Upload Your Resume | Kareer Guide" },
-      {
-        name: "description",
-        content:
-          "Upload a PDF or DOCX resume, or type your skills, and Kareer Guide finds live jobs and internships that match you.",
-      },
-      { property: "og:title", content: "Job Match | Kareer Guide" },
-      { property: "og:description", content: "Match your resume to live jobs and internships." },
-      { property: "og:url", content: "/recommendations" },
-    ],
-    links: [{ rel: "canonical", href: "/recommendations" }],
-  }),
+  head: () =>
+    seo({
+      title: "Job Match — Upload Your Resume",
+      description:
+        "Upload a PDF or DOCX resume, or type your skills, and Kareer Guide finds live jobs and internships that match you.",
+      path: "/recommendations",
+      keywords: [
+        "resume job matching",
+        "upload resume find jobs",
+        "skill based job search",
+        "internship search india",
+      ],
+    }),
   component: Recommendations,
 });
+
+type NominatimAddress = {
+  city?: string;
+  town?: string;
+  state_district?: string;
+  state?: string;
+  country?: string;
+};
 
 function Recommendations() {
   const navigate = useNavigate();
@@ -56,15 +66,20 @@ function Recommendations() {
   }
 
   async function detectLocation() {
-    if (!navigator.geolocation) return toast.error("Location is not available in this browser");
+    if (!navigator.geolocation) {
+      toast.error("Location is not available in this browser");
+      return;
+    }
     navigator.geolocation.getCurrentPosition(async (pos) => {
       try {
         const res = await fetch(
           `https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`,
         );
-        const data = (await res.json()) as { address?: Record<string, string> };
+        const data = (await res.json()) as { address?: NominatimAddress };
         const a = data.address ?? {};
-        setLocation([a.city ?? a.town ?? a.state_district ?? a.state, a.country].filter(Boolean).join(", "));
+        setLocation(
+          [a.city ?? a.town ?? a.state_district ?? a.state, a.country].filter(Boolean).join(", "),
+        );
       } catch {
         toast.error("Could not detect your location");
       }
@@ -79,7 +94,8 @@ function Recommendations() {
         if (!resumeText) throw new Error("Upload a resume first");
         setStatus("Understanding your skills…");
         skillList = (await doAnalyze({ data: { resumeText } })).skills;
-        sessionStorage.setItem("kg.resumeText", resumeText);
+        if (!skillList.length) throw new Error("Could not read any skills from that resume");
+        sessionStorage.setItem(SK.resumeText, resumeText);
       } else {
         skillList = skills
           .split(/[,\n]/)
@@ -87,10 +103,22 @@ function Recommendations() {
           .filter(Boolean);
         if (!skillList.length) throw new Error("Enter at least one skill");
       }
-      sessionStorage.setItem("kg.skills", JSON.stringify(skillList));
+      writeJson(SK.skills, skillList);
       setStatus("Searching live job boards…");
-      const { jobs } = await doSearch({ data: { skills: skillList, location, internship } });
-      sessionStorage.setItem("kg.jobs", JSON.stringify(jobs));
+      const { jobs } = await doSearch({
+        data: {
+          skills: skillList,
+          location,
+          internship,
+          countryCode: countryCodeFor(location),
+        },
+      });
+      if (!jobs.length)
+        throw new Error("No fresh matches right now — try broader skills or a different location");
+      writeJson(SK.jobs, jobs);
+      // /jobs pre-fills its location filter from this, so the location the user
+      // typed here keeps working on the results page instead of being dropped.
+      sessionStorage.setItem(SK.searchLocation, location);
       navigate({ to: "/jobs" });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Something went wrong");
@@ -112,7 +140,9 @@ function Recommendations() {
             onClick={() => setMode(m)}
             className={`btn-brutal -ml-px ${mode === m ? "bg-foreground text-background" : ""}`}
           >
-            <span className="relative z-10">{m === "resume" ? "UPLOAD RESUME" : "ENTER SKILLS"}</span>
+            <span className="relative z-10">
+              {m === "resume" ? "UPLOAD RESUME" : "ENTER SKILLS"}
+            </span>
             {mode !== m && <span className="nav-fill" />}
           </button>
         ))}
@@ -173,7 +203,11 @@ function Recommendations() {
           </div>
         </div>
 
-        <button disabled={busy} className="btn-brutal mt-6 w-full disabled:opacity-60" onClick={submit}>
+        <button
+          disabled={busy}
+          className="btn-brutal mt-6 w-full disabled:opacity-60"
+          onClick={submit}
+        >
           <span className="relative z-10 flex items-center gap-2">
             {busy && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
             {busy ? status || "WORKING…" : "FIND MY JOBS"}

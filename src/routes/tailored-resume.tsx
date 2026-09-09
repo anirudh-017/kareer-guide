@@ -3,21 +3,18 @@ import { Download, ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Page } from "@/components/Page";
+import { seo } from "@/lib/seo";
+import { SK, readJson } from "@/lib/session";
 
 export const Route = createFileRoute("/tailored-resume")({
-  head: () => ({
-    meta: [
-      { title: "Your Tailored Resume | Kareer Guide" },
-      {
-        name: "description",
-        content: "Download your ATS-ready tailored resume as text or PDF and apply to the exact job it was written for.",
-      },
-      { property: "og:title", content: "Your Tailored Resume | Kareer Guide" },
-      { property: "og:description", content: "ATS-ready resume, scored and ready to download." },
-      { property: "og:url", content: "/tailored-resume" },
-    ],
-    links: [{ rel: "canonical", href: "/tailored-resume" }],
-  }),
+  head: () =>
+    seo({
+      title: "Your Tailored Resume",
+      description:
+        "Download your ATS-ready tailored resume as text or PDF and apply to the exact job it was written for.",
+      path: "/tailored-resume",
+      keywords: ["tailored resume download", "ats ready resume", "resume pdf export"],
+    }),
   component: TailoredResume,
 });
 
@@ -44,8 +41,7 @@ function TailoredResume() {
   const [r, setR] = useState<Result | null>(null);
 
   useEffect(() => {
-    const raw = sessionStorage.getItem("kg.tailored");
-    if (raw) setR(JSON.parse(raw) as Result);
+    setR(readJson<Result>(SK.tailored));
   }, []);
 
   function downloadTxt() {
@@ -82,7 +78,9 @@ function TailoredResume() {
   if (!r)
     return (
       <Page title="Tailored Resume">
-        <p className="text-sm text-muted-foreground">Nothing here yet — start from Tailor Resume.</p>
+        <p className="text-sm text-muted-foreground">
+          Nothing here yet — start from Tailor Resume.
+        </p>
       </Page>
     );
 
@@ -109,7 +107,8 @@ function TailoredResume() {
         {r.job?.applyLink && (
           <a href={r.job.applyLink} target="_blank" rel="noreferrer" className="btn-brutal -ml-px">
             <span className="relative z-10 flex items-center gap-2">
-              APPLY TO {(r.job.company ?? "THIS JOB").toUpperCase()} <ExternalLink className="h-3 w-3" />
+              APPLY TO {(r.job.company ?? "THIS JOB").toUpperCase()}{" "}
+              <ExternalLink className="h-3 w-3" />
             </span>
             <span className="nav-fill" />
           </a>

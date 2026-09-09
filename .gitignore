@@ -16,6 +16,11 @@ dist-ssr
 .nitro
 *.local
 
+# Local secrets — never commit. .env.example is the committed template.
+.env
+.env.*
+!.env.example
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars

@@ -14,9 +14,8 @@ export async function extractResumeText(file: File): Promise<string> {
       const page = await doc.getPage(i);
       const content = await page.getTextContent();
       out +=
-        content.items
-          .map((it) => ("str" in it ? (it as { str: string }).str : ""))
-          .join(" ") + "\n";
+        content.items.map((it) => ("str" in it ? (it as { str: string }).str : "")).join(" ") +
+        "\n";
     }
     return out.trim();
   }
@@ -24,11 +23,7 @@ export async function extractResumeText(file: File): Promise<string> {
   if (name.endsWith(".docx")) {
     const mammoth = await import("mammoth/mammoth.browser.js");
     const buf = await file.arrayBuffer();
-    const result = await (
-      mammoth as unknown as {
-        extractRawText: (o: { arrayBuffer: ArrayBuffer }) => Promise<{ value: string }>;
-      }
-    ).extractRawText({ arrayBuffer: buf });
+    const result = await mammoth.extractRawText({ arrayBuffer: buf });
     return result.value.trim();
   }
 

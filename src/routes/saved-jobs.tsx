@@ -3,23 +3,20 @@ import { ExternalLink, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Page } from "@/components/Page";
+import { seo } from "@/lib/seo";
 import { getSavedJobs, removeJob } from "@/lib/savedJobs";
+import { SK, writeJson } from "@/lib/session";
 import type { SavedJob } from "@/lib/types";
 
 export const Route = createFileRoute("/saved-jobs")({
-  head: () => ({
-    meta: [
-      { title: "Saved Jobs | Kareer Guide" },
-      {
-        name: "description",
-        content: "Your shortlist of saved jobs and internships, with the tailored resume for each one.",
-      },
-      { property: "og:title", content: "Saved Jobs | Kareer Guide" },
-      { property: "og:description", content: "Your job shortlist and tailored resumes." },
-      { property: "og:url", content: "/saved-jobs" },
-    ],
-    links: [{ rel: "canonical", href: "/saved-jobs" }],
-  }),
+  head: () =>
+    seo({
+      title: "Saved Jobs",
+      description:
+        "Your shortlist of saved jobs and internships, with the tailored resume for each one.",
+      path: "/saved-jobs",
+      keywords: ["saved jobs", "job shortlist", "tailored resume tracker"],
+    }),
   component: SavedJobsPage,
 });
 
@@ -35,30 +32,24 @@ function SavedJobsPage() {
   }, []);
 
   function tailor(job: SavedJob) {
-    sessionStorage.setItem(
-      "kg.tailorJob",
-      JSON.stringify({
-        jobDescription: job.description,
-        title: job.title,
-        company: job.company,
-        location: job.location,
-        applyLink: job.applyLink,
-        savedId: job.id,
-      }),
-    );
+    writeJson(SK.tailorJob, {
+      jobDescription: job.description,
+      title: job.title,
+      company: job.company,
+      location: job.location,
+      applyLink: job.applyLink,
+      savedId: job.id,
+    });
     navigate({ to: "/tailor-resume" });
   }
 
   function view(job: SavedJob) {
-    sessionStorage.setItem(
-      "kg.tailored",
-      JSON.stringify({
-        tailoredResume: job.tailoredResume,
-        score: job.tailoredScore ?? 0,
-        fitScore: 0,
-        job: { title: job.title, company: job.company, applyLink: job.applyLink, savedId: job.id },
-      }),
-    );
+    writeJson(SK.tailored, {
+      tailoredResume: job.tailoredResume,
+      score: job.tailoredScore ?? 0,
+      fitScore: job.tailoredFitScore ?? 0,
+      job: { title: job.title, company: job.company, applyLink: job.applyLink, savedId: job.id },
+    });
     navigate({ to: "/tailored-resume" });
   }
 

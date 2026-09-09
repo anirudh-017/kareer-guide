@@ -14,6 +14,7 @@ export type SavedJob = Job & {
   savedAt: string;
   tailoredResume?: string;
   tailoredScore?: number;
+  tailoredFitScore?: number;
 };
 
 export type RoadmapPhase = {

@@ -38,9 +38,28 @@ function ThemeToggle() {
 function NavInner() {
   const [open, setOpen] = useState(false);
 
+  // A full-screen overlay that traps neither Escape nor the page scroll feels
+  // broken on mobile — you can scroll the page behind it and have no key out.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
   return (
     <>
-      <nav className="fixed left-4 top-4 z-50 hidden md:left-8 md:top-8 md:flex">
+      <nav
+        aria-label="Primary"
+        className="fixed left-4 top-4 z-50 hidden md:left-8 md:top-8 md:flex"
+      >
         <ThemeToggle />
         {LINKS.map((l) => (
           <Link key={l.to} to={l.to} className="nav-box -ml-px">
@@ -52,14 +71,24 @@ function NavInner() {
 
       <div className="fixed left-4 top-4 z-50 flex md:hidden">
         <ThemeToggle />
-        <button className="nav-box -ml-px" onClick={() => setOpen(true)}>
+        <button
+          className="nav-box -ml-px"
+          onClick={() => setOpen(true)}
+          aria-expanded={open}
+          aria-haspopup="dialog"
+        >
           <span className="nav-fill" />
           <span className="relative z-10">MENU</span>
         </button>
       </div>
 
       {open && (
-        <div className="fixed inset-0 z-[60] flex flex-col items-start justify-center gap-2 bg-background px-6">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu"
+          className="fixed inset-0 z-[60] flex flex-col items-start justify-center gap-2 bg-background px-6"
+        >
           <button
             className="nav-box absolute right-4 top-4"
             onClick={() => setOpen(false)}
@@ -87,6 +116,11 @@ function NavInner() {
 export function Nav() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
-  if (!mounted) return null;
+
+  // There is no document.body to portal into during SSR. Rendering the nav in
+  // place instead of null keeps every internal link in the server HTML — which
+  // is what crawlers follow — and the first client render matches it exactly,
+  // so hydration stays clean. Once mounted we hand off to the portal.
+  if (!mounted) return <NavInner />;
   return createPortal(<NavInner />, document.body);
 }
