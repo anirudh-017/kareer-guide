@@ -12,6 +12,20 @@ export const OG_IMAGE = `${SITE_URL}/og-image.png`;
 
 export const absolute = (path: string) => `${SITE_URL}${path === "/" ? "" : path}`;
 
+/** Every public route, for the sitemap. Keep in sync with src/routes. */
+export const SITEMAP_PATHS = [
+  "/",
+  "/recommendations",
+  "/jobs",
+  "/saved-jobs",
+  "/tailor-resume",
+  "/resume-analysis",
+  "/tailored-resume",
+  "/roadmap",
+  "/dream-job",
+  "/dream-job/history",
+];
+
 type SeoInput = {
   title: string;
   description: string;

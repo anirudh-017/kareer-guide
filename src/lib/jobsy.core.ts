@@ -7,7 +7,7 @@
  */
 import { ai, aiGroq, parseJson } from "./ai.server";
 import { aggregateJobs, type JobSearchOptions } from "./jobs.server";
-import type { Job, ResumeAnalysis, RoadmapPhase } from "./types";
+import type { Job, ResumeAnalysis, Roadmap, RoadmapPhase, RoadmapResource } from "./types";
 
 /** Extract 10-20 lowercase skill keywords from raw resume text. */
 export async function extractSkills(resumeText: string): Promise<string[]> {
@@ -28,18 +28,109 @@ export async function findJobs(opts: JobSearchOptions): Promise<Job[]> {
   return aggregateJobs(opts);
 }
 
-/** A 6-8 phase path from beginner to job-ready for a target role. Runs on Groq. */
-export async function buildRoadmap(role: string, background?: string): Promise<RoadmapPhase[]> {
+const DIFFICULTIES = ["Beginner", "Intermediate", "Advanced"] as const;
+const RESOURCE_TYPES = ["Course", "Book", "Website", "YouTube", "Tool", "Docs"] as const;
+
+const str = (v: unknown, fallback = "") =>
+  typeof v === "string" && v.trim() ? v.trim() : fallback;
+const strList = (v: unknown, max: number): string[] =>
+  Array.isArray(v)
+    ? v
+        .map((x) => str(x))
+        .filter(Boolean)
+        .slice(0, max)
+    : [];
+
+/** Coerce whatever the model returned into a phase the UI can render safely. */
+function toPhase(raw: unknown, index: number): RoadmapPhase {
+  const p = (raw ?? {}) as Record<string, unknown>;
+  const difficulty = str(p["difficulty"]);
+  return {
+    phase: str(p["phase"], `Phase ${index + 1}`),
+    duration: str(p["duration"], "4-6 weeks"),
+    difficulty: (DIFFICULTIES as readonly string[]).includes(difficulty)
+      ? (difficulty as RoadmapPhase["difficulty"])
+      : "Beginner",
+    description: str(p["description"]),
+    topics: Array.isArray(p["topics"])
+      ? (p["topics"] as unknown[])
+          .map((t) => {
+            const o = (t ?? {}) as Record<string, unknown>;
+            return { name: str(o["name"]), detail: str(o["detail"]) };
+          })
+          .filter((t) => t.name)
+          .slice(0, 8)
+      : [],
+    tools: strList(p["tools"], 8),
+    resources: Array.isArray(p["resources"])
+      ? (p["resources"] as unknown[])
+          .map((r) => {
+            const o = (r ?? {}) as Record<string, unknown>;
+            const type = str(o["type"]);
+            return {
+              title: str(o["title"]),
+              author: str(o["author"]),
+              type: ((RESOURCE_TYPES as readonly string[]).includes(type)
+                ? type
+                : "Website") as RoadmapResource["type"],
+            };
+          })
+          .filter((r) => r.title)
+          .slice(0, 6)
+      : [],
+    projects: strList(p["projects"], 4),
+    milestone: str(p["milestone"]),
+  };
+}
+
+/**
+ * A full learning roadmap: market overview, prerequisites, then 5-8 phases that
+ * each carry topics with explanations, tools, real resources, projects and a
+ * single milestone that proves the phase is done. Runs on Groq.
+ */
+export async function buildRoadmap(role: string, background?: string): Promise<Roadmap> {
   const text = await aiGroq(
-    `Create a career roadmap to become a "${role}".
-${background ? `Candidate background: ${background}` : ""}
-Return ONLY JSON: an array of 6 to 8 objects with keys:
-phase (string), duration (string), skills (string[]), resources (string[] of FREE resources with names), projects (string[] project ideas), milestones (string[]).
-Order from absolute beginner to job-ready/advanced. Be specific and practical, India-friendly where relevant.`,
-    "You are a senior career coach. Reply with JSON only.",
+    `Create a complete, professional learning roadmap for someone who wants to become a "${role}".
+${background ? `Tailor it to this person's starting point: ${background}` : "Assume a motivated beginner with no professional experience in this field."}
+
+Return ONLY JSON with this exact shape:
+{
+ "overview": "3-4 sentences: what this role actually does day to day, which industries hire for it, and realistic salary expectations. Concrete, not motivational filler.",
+ "totalDuration": "e.g. 6-9 Months",
+ "prerequisites": [2-4 things someone should already have before starting],
+ "phases": [5 to 7 objects, ordered from foundations to job-ready:
+   {
+     "phase": "phase name, e.g. Programming Fundamentals & Logic",
+     "duration": "e.g. 4-6 weeks",
+     "difficulty": "Beginner" | "Intermediate" | "Advanced",
+     "description": "2-3 sentences: why this phase matters for THIS role and what it unlocks next",
+     "topics": [4-6 objects {"name": "the topic", "detail": "one sentence on what it covers"}],
+     "tools": [3-5 named tools or technologies used in this phase],
+     "resources": [3-5 objects {"title": "real resource name", "author": "author/instructor/publisher, or empty string for sites and docs", "type": "Course"|"Book"|"Website"|"YouTube"|"Tool"|"Docs"}],
+     "projects": [2-3 concrete hands-on projects, each one sentence],
+     "milestone": "one measurable check that proves this phase is complete"
+   }]
+}
+
+RULES
+- Every resource must be real and well known. Never invent a course, book or channel. No URLs.
+- Difficulty must climb across the phases; the first phase is Beginner.
+- Be specific and practical, India-friendly where relevant.`,
+    "You are a senior career coach who writes precise, honest learning plans. Reply with JSON only.",
   );
-  const phases = parseJson<RoadmapPhase[]>(text, []);
-  return Array.isArray(phases) ? phases.slice(0, 8) : [];
+
+  const parsed = parseJson<Record<string, unknown>>(text, {});
+  const phases = Array.isArray(parsed["phases"])
+    ? (parsed["phases"] as unknown[]).slice(0, 8).map(toPhase)
+    : [];
+
+  return {
+    role,
+    overview: str(parsed["overview"]),
+    totalDuration: str(parsed["totalDuration"]),
+    prerequisites: strList(parsed["prerequisites"], 5),
+    phases,
+  };
 }
 
 export const EMPTY_ANALYSIS: ResumeAnalysis = {
@@ -165,7 +256,9 @@ ${args.jobDescription.slice(0, 8000)}`
     // the host's request timeout, so stop refining once the budget is gone and
     // return the best version reached — always a complete, usable resume.
     if (Date.now() - startedAt > REFINE_BUDGET_MS) {
-      console.warn(`[tailor] refinement budget spent after ${i} pass(es); returning score ${score}`);
+      console.warn(
+        `[tailor] refinement budget spent after ${i} pass(es); returning score ${score}`,
+      );
       break;
     }
     resume = await ai(

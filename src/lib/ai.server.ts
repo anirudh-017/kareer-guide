@@ -53,6 +53,15 @@ export const GROQ_MODEL = "openai/gpt-oss-120b";
 const hasLovable = () => Boolean(process.env["LOVABLE_API_KEY"]);
 const hasGroq = () => Boolean(process.env["GROQ_API_KEY"]);
 
+/**
+ * Every caller here asks for a single JSON document, and a truncated one is
+ * worthless — `parseJson` can only fall back to an empty result, which reaches
+ * the user as a blank roadmap. The SDK's default cap silently cut the Dream Job
+ * coaching response mid-object, so state a ceiling large enough for the biggest
+ * response we ask for (roadmap + projects + interview prep ≈ 3k tokens).
+ */
+const MAX_OUTPUT_TOKENS = 12_000;
+
 /** Warn once per provider swap per process, not once per request. */
 const warned = new Set<string>();
 function warnOnce(message: string) {
@@ -75,6 +84,7 @@ async function viaLovable(prompt: string, system?: string): Promise<string> {
   // hitting an idle-response timeout on the longer resume prompts.
   const result = streamText({
     model: g(MODEL),
+    maxOutputTokens: MAX_OUTPUT_TOKENS,
     ...(system ? { system } : {}),
     prompt,
   });
@@ -85,6 +95,7 @@ async function viaGroq(prompt: string, system?: string): Promise<string> {
   const g = groqGateway();
   const { text } = await generateText({
     model: g(GROQ_MODEL),
+    maxOutputTokens: MAX_OUTPUT_TOKENS,
     ...(system ? { system } : {}),
     prompt,
   });
@@ -121,6 +132,7 @@ export async function aiShort(prompt: string, system?: string): Promise<string> 
   const g = gateway();
   const { text } = await generateText({
     model: g(MODEL),
+    maxOutputTokens: MAX_OUTPUT_TOKENS,
     ...(system ? { system } : {}),
     prompt,
   });

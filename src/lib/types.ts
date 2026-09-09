@@ -17,13 +17,42 @@ export type SavedJob = Job & {
   tailoredFitScore?: number;
 };
 
+export type Difficulty = "Beginner" | "Intermediate" | "Advanced";
+
+/** A topic to learn, with the one-line reason it matters. */
+export type RoadmapTopic = { name: string; detail: string };
+
+export type ResourceType = "Course" | "Book" | "Website" | "YouTube" | "Tool" | "Docs";
+
+export type RoadmapResource = {
+  title: string;
+  /** Author, instructor or publisher — omitted for sites and docs. */
+  author: string;
+  type: ResourceType;
+};
+
 export type RoadmapPhase = {
   phase: string;
   duration: string;
-  skills: string[];
-  resources: string[];
+  difficulty: Difficulty;
+  /** Why this phase exists and what it unlocks — 2-3 sentences. */
+  description: string;
+  topics: RoadmapTopic[];
+  tools: string[];
+  resources: RoadmapResource[];
   projects: string[];
-  milestones: string[];
+  /** The single check that proves the phase is done. */
+  milestone: string;
+};
+
+export type Roadmap = {
+  role: string;
+  /** Market context: what the work is, who hires for it, what it pays. */
+  overview: string;
+  /** End-to-end estimate, e.g. "6-9 Months". */
+  totalDuration: string;
+  prerequisites: string[];
+  phases: RoadmapPhase[];
 };
 
 export type Signal = { name: string; score: number; note: string };

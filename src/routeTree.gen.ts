@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DreamJobRouteImport } from './routes/dream-job'
 import { Route as JobsRouteImport } from './routes/jobs'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as RecommendationsRouteImport } from './routes/recommendations'
@@ -18,10 +19,17 @@ import { Route as RoadmapRouteImport } from './routes/roadmap'
 import { Route as SavedJobsRouteImport } from './routes/saved-jobs'
 import { Route as TailorResumeRouteImport } from './routes/tailor-resume'
 import { Route as TailoredResumeRouteImport } from './routes/tailored-resume'
+import { Route as DreamJobHistoryRouteImport } from './routes/dream-job_.history'
+import { Route as DreamJobResultsRouteImport } from './routes/dream-job_.results'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DreamJobRoute = DreamJobRouteImport.update({
+  id: '/dream-job',
+  path: '/dream-job',
   getParentRoute: () => rootRouteImport,
 } as any)
 const JobsRoute = JobsRouteImport.update({
@@ -64,9 +72,20 @@ const TailoredResumeRoute = TailoredResumeRouteImport.update({
   path: '/tailored-resume',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DreamJobHistoryRoute = DreamJobHistoryRouteImport.update({
+  id: '/dream-job_/history',
+  path: '/dream-job/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DreamJobResultsRoute = DreamJobResultsRouteImport.update({
+  id: '/dream-job_/results',
+  path: '/dream-job/results',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dream-job': typeof DreamJobRoute
   '/jobs': typeof JobsRoute
   '/mcp': typeof McpRoute
   '/recommendations': typeof RecommendationsRoute
@@ -75,9 +94,12 @@ export interface FileRoutesByFullPath {
   '/saved-jobs': typeof SavedJobsRoute
   '/tailor-resume': typeof TailorResumeRoute
   '/tailored-resume': typeof TailoredResumeRoute
+  '/dream-job/history': typeof DreamJobHistoryRoute
+  '/dream-job/results': typeof DreamJobResultsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dream-job': typeof DreamJobRoute
   '/jobs': typeof JobsRoute
   '/mcp': typeof McpRoute
   '/recommendations': typeof RecommendationsRoute
@@ -86,10 +108,13 @@ export interface FileRoutesByTo {
   '/saved-jobs': typeof SavedJobsRoute
   '/tailor-resume': typeof TailorResumeRoute
   '/tailored-resume': typeof TailoredResumeRoute
+  '/dream-job/history': typeof DreamJobHistoryRoute
+  '/dream-job/results': typeof DreamJobResultsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dream-job': typeof DreamJobRoute
   '/jobs': typeof JobsRoute
   '/mcp': typeof McpRoute
   '/recommendations': typeof RecommendationsRoute
@@ -98,11 +123,14 @@ export interface FileRoutesById {
   '/saved-jobs': typeof SavedJobsRoute
   '/tailor-resume': typeof TailorResumeRoute
   '/tailored-resume': typeof TailoredResumeRoute
+  '/dream-job_/history': typeof DreamJobHistoryRoute
+  '/dream-job_/results': typeof DreamJobResultsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/dream-job'
     | '/jobs'
     | '/mcp'
     | '/recommendations'
@@ -111,9 +139,12 @@ export interface FileRouteTypes {
     | '/saved-jobs'
     | '/tailor-resume'
     | '/tailored-resume'
+    | '/dream-job/history'
+    | '/dream-job/results'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/dream-job'
     | '/jobs'
     | '/mcp'
     | '/recommendations'
@@ -122,9 +153,12 @@ export interface FileRouteTypes {
     | '/saved-jobs'
     | '/tailor-resume'
     | '/tailored-resume'
+    | '/dream-job/history'
+    | '/dream-job/results'
   id:
     | '__root__'
     | '/'
+    | '/dream-job'
     | '/jobs'
     | '/mcp'
     | '/recommendations'
@@ -133,10 +167,13 @@ export interface FileRouteTypes {
     | '/saved-jobs'
     | '/tailor-resume'
     | '/tailored-resume'
+    | '/dream-job_/history'
+    | '/dream-job_/results'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DreamJobRoute: typeof DreamJobRoute
   JobsRoute: typeof JobsRoute
   McpRoute: typeof McpRoute
   RecommendationsRoute: typeof RecommendationsRoute
@@ -145,6 +182,8 @@ export interface RootRouteChildren {
   SavedJobsRoute: typeof SavedJobsRoute
   TailorResumeRoute: typeof TailorResumeRoute
   TailoredResumeRoute: typeof TailoredResumeRoute
+  DreamJobHistoryRoute: typeof DreamJobHistoryRoute
+  DreamJobResultsRoute: typeof DreamJobResultsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -154,6 +193,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dream-job': {
+      id: '/dream-job'
+      path: '/dream-job'
+      fullPath: '/dream-job'
+      preLoaderRoute: typeof DreamJobRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/jobs': {
@@ -212,11 +258,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TailoredResumeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dream-job_/history': {
+      id: '/dream-job_/history'
+      path: '/dream-job/history'
+      fullPath: '/dream-job/history'
+      preLoaderRoute: typeof DreamJobHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dream-job_/results': {
+      id: '/dream-job_/results'
+      path: '/dream-job/results'
+      fullPath: '/dream-job/results'
+      preLoaderRoute: typeof DreamJobResultsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DreamJobRoute: DreamJobRoute,
   JobsRoute: JobsRoute,
   McpRoute: McpRoute,
   RecommendationsRoute: RecommendationsRoute,
@@ -225,6 +286,8 @@ const rootRouteChildren: RootRouteChildren = {
   SavedJobsRoute: SavedJobsRoute,
   TailorResumeRoute: TailorResumeRoute,
   TailoredResumeRoute: TailoredResumeRoute,
+  DreamJobHistoryRoute: DreamJobHistoryRoute,
+  DreamJobResultsRoute: DreamJobResultsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

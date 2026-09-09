@@ -160,9 +160,9 @@ function AnalysisPage() {
       <div className="mt-8 card-brutal">
         <p className="label">MISSING KEYWORDS — TAP TO INCLUDE</p>
         <div className="mt-3 flex flex-wrap gap-2">
-          {(a.missingKeywords ?? []).map((k) => (
+          {(a.missingKeywords ?? []).map((k, i) => (
             <button
-              key={k}
+              key={`${i}-${k}`}
               onClick={() => toggle(keywords, setKeywords, k)}
               className="label border border-border px-3 py-2"
               style={

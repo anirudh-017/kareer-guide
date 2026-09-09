@@ -17,6 +17,12 @@ export const SK = {
   profile: "kg.profile",
   analysis: "kg.analysis",
   tailored: "kg.tailored",
+  dreamResult: "kg.dreamResult",
+  dreamProfile: "kg.dreamProfile",
+  dreamSkills: "kg.dreamSkills",
+  dreamCompany: "kg.dreamCompany",
+  dreamRole: "kg.dreamRole",
+  dreamPrevious: "kg.dreamPrevious",
 } as const;
 
 export type TailorHandoff = {

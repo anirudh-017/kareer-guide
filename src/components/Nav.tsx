@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 const LINKS = [
   { to: "/", label: "KAREER GUIDE" },
   { to: "/recommendations", label: "JOB MATCH" },
+  { to: "/dream-job", label: "🎯 DREAM JOB" },
   { to: "/saved-jobs", label: "SAVED JOBS" },
   { to: "/tailor-resume", label: "TAILOR RESUME" },
   { to: "/roadmap", label: "ROADMAP" },
@@ -35,7 +36,7 @@ function ThemeToggle() {
   );
 }
 
-function NavInner() {
+function NavInner({ mobileOnly }: { mobileOnly: boolean }) {
   const [open, setOpen] = useState(false);
 
   // A full-screen overlay that traps neither Escape nor the page scroll feels
@@ -56,18 +57,20 @@ function NavInner() {
 
   return (
     <>
-      <nav
-        aria-label="Primary"
-        className="fixed left-4 top-4 z-50 hidden md:left-8 md:top-8 md:flex"
-      >
-        <ThemeToggle />
-        {LINKS.map((l) => (
-          <Link key={l.to} to={l.to} className="nav-box -ml-px">
-            <span className="nav-fill" />
-            <span className="relative z-10">{l.label}</span>
-          </Link>
-        ))}
-      </nav>
+      {!mobileOnly && (
+        <nav
+          aria-label="Primary"
+          className="fixed left-4 top-4 z-50 hidden md:left-8 md:top-8 md:flex"
+        >
+          <ThemeToggle />
+          {LINKS.map((l) => (
+            <Link key={l.to} to={l.to} className="nav-box -ml-px">
+              <span className="nav-fill" />
+              <span className="relative z-10">{l.label}</span>
+            </Link>
+          ))}
+        </nav>
+      )}
 
       <div className="fixed left-4 top-4 z-50 flex md:hidden">
         <ThemeToggle />
@@ -113,7 +116,12 @@ function NavInner() {
   );
 }
 
-export function Nav() {
+/**
+ * @param mobileOnly Hide the fixed desktop bar, keeping the mobile toggle and
+ * MENU overlay. Used by pages that render their own header — the mobile
+ * navigation and theme toggle still have to come from somewhere.
+ */
+export function Nav({ mobileOnly = false }: { mobileOnly?: boolean } = {}) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -121,6 +129,6 @@ export function Nav() {
   // place instead of null keeps every internal link in the server HTML — which
   // is what crawlers follow — and the first client render matches it exactly,
   // so hydration stays clean. Once mounted we hand off to the portal.
-  if (!mounted) return <NavInner />;
-  return createPortal(<NavInner />, document.body);
+  if (!mounted) return <NavInner mobileOnly={mobileOnly} />;
+  return createPortal(<NavInner mobileOnly={mobileOnly} />, document.body);
 }
