@@ -38,9 +38,14 @@ export function isSaved(job: Job) {
   return getSavedJobs().some((j) => j.id === jobId(job));
 }
 
-export function attachTailoredResume(id: string, tailoredResume: string, tailoredScore: number) {
+export function attachTailoredResume(
+  id: string,
+  tailoredResume: string,
+  tailoredScore: number,
+  tailoredFitScore: number,
+) {
   const jobs = getSavedJobs().map((j) =>
-    j.id === id ? { ...j, tailoredResume, tailoredScore } : j,
+    j.id === id ? { ...j, tailoredResume, tailoredScore, tailoredFitScore } : j,
   );
   write(jobs);
 }

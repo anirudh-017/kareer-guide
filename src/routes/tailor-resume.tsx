@@ -5,35 +5,65 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Page } from "@/components/Page";
+import { seo } from "@/lib/seo";
 import { tailorAnalyze } from "@/lib/jobsy.functions";
 import { extractResumeText } from "@/lib/resumeParse";
+import { SK, clear, readJson, writeJson, type TailorHandoff } from "@/lib/session";
 
 export const Route = createFileRoute("/tailor-resume")({
-  head: () => ({
-    meta: [
-      { title: "Tailor Your Resume to Any Job | Kareer Guide" },
-      {
-        name: "description",
-        content:
-          "Upload your resume, paste a job description, and get a recruiter-grade review plus a rewritten, ATS-ready resume.",
-      },
-      { property: "og:title", content: "Tailor Your Resume | Kareer Guide" },
-      { property: "og:description", content: "Recruiter-grade resume review and rewrite." },
-      { property: "og:url", content: "/tailor-resume" },
-    ],
-    links: [{ rel: "canonical", href: "/tailor-resume" }],
-  }),
+  head: () =>
+    seo({
+      title: "Tailor Your Resume to Any Job",
+      description:
+        "Upload your resume, paste a job description, and get a recruiter-grade review plus a rewritten, ATS-ready resume.",
+      path: "/tailor-resume",
+      keywords: [
+        "resume tailoring",
+        "ats resume optimizer",
+        "job description match",
+        "resume rewrite ai",
+      ],
+    }),
   component: TailorResume,
 });
 
 const REGIONS = [
-  "🌍 Global", "🇮🇳 India", "🇺🇸 United States", "🇬🇧 United Kingdom", "🇨🇦 Canada", "🇦🇺 Australia",
-  "🇩🇪 Germany", "🇫🇷 France", "🇳🇱 Netherlands", "🇮🇪 Ireland", "🇸🇬 Singapore", "🇦🇪 UAE",
-  "🇸🇦 Saudi Arabia", "🇶🇦 Qatar", "🇯🇵 Japan", "🇰🇷 South Korea", "🇨🇳 China", "🇭🇰 Hong Kong",
-  "🇳🇿 New Zealand", "🇿🇦 South Africa", "🇧🇷 Brazil", "🇲🇽 Mexico", "🇦🇷 Argentina", "🇪🇸 Spain",
-  "🇮🇹 Italy", "🇸🇪 Sweden", "🇳🇴 Norway", "🇩🇰 Denmark", "🇫🇮 Finland", "🇵🇱 Poland",
-  "🇨🇭 Switzerland", "🇦🇹 Austria", "🇧🇪 Belgium", "🇵🇹 Portugal", "🇲🇾 Malaysia",
-];
+  "🌍 Global",
+  "🇮🇳 India",
+  "🇺🇸 United States",
+  "🇬🇧 United Kingdom",
+  "🇨🇦 Canada",
+  "🇦🇺 Australia",
+  "🇩🇪 Germany",
+  "🇫🇷 France",
+  "🇳🇱 Netherlands",
+  "🇮🇪 Ireland",
+  "🇸🇬 Singapore",
+  "🇦🇪 UAE",
+  "🇸🇦 Saudi Arabia",
+  "🇶🇦 Qatar",
+  "🇯🇵 Japan",
+  "🇰🇷 South Korea",
+  "🇨🇳 China",
+  "🇭🇰 Hong Kong",
+  "🇳🇿 New Zealand",
+  "🇿🇦 South Africa",
+  "🇧🇷 Brazil",
+  "🇲🇽 Mexico",
+  "🇦🇷 Argentina",
+  "🇪🇸 Spain",
+  "🇮🇹 Italy",
+  "🇸🇪 Sweden",
+  "🇳🇴 Norway",
+  "🇩🇰 Denmark",
+  "🇫🇮 Finland",
+  "🇵🇱 Poland",
+  "🇨🇭 Switzerland",
+  "🇦🇹 Austria",
+  "🇧🇪 Belgium",
+  "🇵🇹 Portugal",
+  "🇲🇾 Malaysia",
+] as const;
 
 const PROFILES = [
   "Standard Professional",
@@ -43,7 +73,7 @@ const PROFILES = [
   "Startup",
   "Public Sector",
   "Others",
-];
+] as const;
 
 function TailorResume() {
   const navigate = useNavigate();
@@ -53,25 +83,37 @@ function TailorResume() {
   const [fileName, setFileName] = useState("");
   const [resumeText, setResumeText] = useState("");
   const [jobDescription, setJobDescription] = useState("");
-  const [region, setRegion] = useState(REGIONS[1]);
-  const [companyProfile, setCompanyProfile] = useState(PROFILES[0]);
-  const [jobMeta, setJobMeta] = useState<Record<string, string> | null>(null);
+  const [region, setRegion] = useState<string>(REGIONS[1]);
+  const [companyProfile, setCompanyProfile] = useState<string>(PROFILES[0]);
+  const [jobMeta, setJobMeta] = useState<TailorHandoff | null>(null);
   const [busy, setBusy] = useState(false);
   const autoStarted = useRef(false);
 
   const analyze = useCallback(
-    async (text: string, jd: string) => {
-      if (text.trim().length < 50) return toast.error("Add your resume first");
+    async (text: string, jd: string, job: TailorHandoff | null) => {
+      if (text.trim().length < 50) {
+        toast.error("Add your resume first");
+        return;
+      }
       setBusy(true);
       try {
         const analysis = await run({
-          data: { resumeText: text, jobDescription: jd || undefined, region, companyProfile },
+          data: {
+            resumeText: text,
+            ...(jd ? { jobDescription: jd } : {}),
+            region,
+            companyProfile,
+          },
         });
-        sessionStorage.setItem("kg.resumeText", text);
-        sessionStorage.setItem("kg.jd", jd);
-        sessionStorage.setItem("kg.region", region);
-        sessionStorage.setItem("kg.profile", companyProfile);
-        sessionStorage.setItem("kg.analysis", JSON.stringify(analysis));
+        sessionStorage.setItem(SK.resumeText, text);
+        sessionStorage.setItem(SK.jd, jd);
+        sessionStorage.setItem(SK.region, region);
+        sessionStorage.setItem(SK.profile, companyProfile);
+        sessionStorage.setItem(SK.analysis, JSON.stringify(analysis));
+        // The job this analysis belongs to, carried forward so /resume-analysis
+        // can attach the finished resume back to the saved-job record.
+        if (job) writeJson(SK.tailorContext, job);
+        else clear(SK.tailorContext);
         navigate({ to: "/resume-analysis" });
       } catch (e) {
         toast.error(e instanceof Error ? e.message : "Analysis failed");
@@ -83,20 +125,22 @@ function TailorResume() {
   );
 
   useEffect(() => {
-    const raw = sessionStorage.getItem("kg.tailorJob");
-    const saved = sessionStorage.getItem("kg.resumeText") ?? "";
+    const saved = sessionStorage.getItem(SK.resumeText) ?? "";
     if (saved) {
       setResumeText(saved);
       setTab("paste");
     }
-    if (raw) {
-      const meta = JSON.parse(raw) as Record<string, string>;
-      setJobMeta(meta);
-      setJobDescription(meta.jobDescription ?? "");
-      if (saved && !autoStarted.current) {
-        autoStarted.current = true;
-        void analyze(saved, meta.jobDescription ?? "");
-      }
+
+    const meta = readJson<TailorHandoff>(SK.tailorJob);
+    if (!meta) return;
+    // One-shot hand-off from /jobs or /saved-jobs. Consume it immediately so a
+    // later visit from the nav starts clean instead of re-analysing a stale job.
+    clear(SK.tailorJob);
+    setJobMeta(meta);
+    setJobDescription(meta.jobDescription ?? "");
+    if (saved && !autoStarted.current) {
+      autoStarted.current = true;
+      void analyze(saved, meta.jobDescription ?? "", meta);
     }
   }, [analyze]);
 
@@ -129,7 +173,11 @@ function TailorResume() {
       <div className="grid gap-6 md:grid-cols-2">
         <div>
           <p className="label mb-2">TARGET REGION</p>
-          <select className="input-brutal" value={region} onChange={(e) => setRegion(e.target.value)}>
+          <select
+            className="input-brutal"
+            value={region}
+            onChange={(e) => setRegion(e.target.value)}
+          >
             {REGIONS.map((r) => (
               <option key={r}>{r}</option>
             ))}
@@ -193,7 +241,7 @@ function TailorResume() {
         <button
           disabled={busy}
           className="btn-brutal mt-6 w-full disabled:opacity-60"
-          onClick={() => analyze(resumeText, jobDescription)}
+          onClick={() => analyze(resumeText, jobDescription, jobMeta)}
         >
           <span className="relative z-10 flex items-center gap-2">
             {busy && <Loader2 className="h-3.5 w-3.5 animate-spin" />}

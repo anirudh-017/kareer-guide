@@ -5,25 +5,21 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Page } from "@/components/Page";
+import { seo } from "@/lib/seo";
 import { tailorApply } from "@/lib/jobsy.functions";
 import { attachTailoredResume } from "@/lib/savedJobs";
+import { SK, readJson, writeJson, type TailorHandoff } from "@/lib/session";
 import type { ResumeAnalysis, Signal } from "@/lib/types";
 
 export const Route = createFileRoute("/resume-analysis")({
-  head: () => ({
-    meta: [
-      { title: "Resume Analysis & Hiring Signals | Kareer Guide" },
-      {
-        name: "description",
-        content:
-          "See your resume score, JD fit, 15 hiring signals, recruiter red flags and XYZ-formula bullet rewrites before you apply the changes.",
-      },
-      { property: "og:title", content: "Resume Analysis | Kareer Guide" },
-      { property: "og:description", content: "15 hiring signals and priority fixes for your resume." },
-      { property: "og:url", content: "/resume-analysis" },
-    ],
-    links: [{ rel: "canonical", href: "/resume-analysis" }],
-  }),
+  head: () =>
+    seo({
+      title: "Resume Analysis & Hiring Signals",
+      description:
+        "See your resume score, JD fit, 15 hiring signals, recruiter red flags and XYZ-formula bullet rewrites before you apply the changes.",
+      path: "/resume-analysis",
+      keywords: ["resume score", "ats score checker", "recruiter red flags", "xyz formula bullets"],
+    }),
   component: AnalysisPage,
 });
 
@@ -71,9 +67,8 @@ function AnalysisPage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    const raw = sessionStorage.getItem("kg.analysis");
-    if (!raw) return;
-    const parsed = JSON.parse(raw) as ResumeAnalysis;
+    const parsed = readJson<ResumeAnalysis>(SK.analysis);
+    if (!parsed) return;
     setA(parsed);
     setKeywords(parsed.missingKeywords ?? []);
     setBullets((parsed.bulletRewrites ?? []).map((b) => b.after));
@@ -88,19 +83,26 @@ function AnalysisPage() {
     try {
       const result = await run({
         data: {
-          resumeText: sessionStorage.getItem("kg.resumeText") ?? "",
-          jobDescription: sessionStorage.getItem("kg.jd") || undefined,
-          region: sessionStorage.getItem("kg.region") ?? undefined,
-          companyProfile: sessionStorage.getItem("kg.profile") ?? undefined,
+          resumeText: sessionStorage.getItem(SK.resumeText) ?? "",
+          ...(sessionStorage.getItem(SK.jd)
+            ? { jobDescription: sessionStorage.getItem(SK.jd)! }
+            : {}),
+          ...(sessionStorage.getItem(SK.region)
+            ? { region: sessionStorage.getItem(SK.region)! }
+            : {}),
+          ...(sessionStorage.getItem(SK.profile)
+            ? { companyProfile: sessionStorage.getItem(SK.profile)! }
+            : {}),
           approvedKeywords: keywords,
           approvedBullets: bullets,
           redFlags: flags,
         },
       });
-      const jobRaw = sessionStorage.getItem("kg.tailorJob");
-      const job = jobRaw ? (JSON.parse(jobRaw) as Record<string, string>) : null;
-      if (job?.savedId) attachTailoredResume(job.savedId, result.tailoredResume, result.score);
-      sessionStorage.setItem("kg.tailored", JSON.stringify({ ...result, job }));
+      const job = readJson<TailorHandoff>(SK.tailorContext);
+      if (job?.savedId) {
+        attachTailoredResume(job.savedId, result.tailoredResume, result.score, result.fitScore);
+      }
+      writeJson(SK.tailored, { ...result, job });
       navigate({ to: "/tailored-resume" });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not generate the resume");
@@ -112,9 +114,7 @@ function AnalysisPage() {
   if (!a)
     return (
       <Page title="Resume Analysis">
-        <p className="text-sm text-muted-foreground">
-          No analysis yet — start from Tailor Resume.
-        </p>
+        <p className="text-sm text-muted-foreground">No analysis yet — start from Tailor Resume.</p>
       </Page>
     );
 
@@ -165,7 +165,9 @@ function AnalysisPage() {
               key={k}
               onClick={() => toggle(keywords, setKeywords, k)}
               className="label border border-border px-3 py-2"
-              style={keywords.includes(k) ? { background: "var(--pink)", color: "#000" } : undefined}
+              style={
+                keywords.includes(k) ? { background: "var(--pink)", color: "#000" } : undefined
+              }
             >
               {k}
             </button>
@@ -200,10 +202,14 @@ function AnalysisPage() {
         </div>
       )}
 
-      <button disabled={busy} className="btn-brutal mt-8 w-full disabled:opacity-60" onClick={apply}>
+      <button
+        disabled={busy}
+        className="btn-brutal mt-8 w-full disabled:opacity-60"
+        onClick={apply}
+      >
         <span className="relative z-10 flex items-center gap-2">
           {busy && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-          {busy ? "GENERATING…" : "APPLY AND GENERATE TAILORED RESUME"}
+          {busy ? "GENERATING… THIS CAN TAKE A MINUTE" : "APPLY AND GENERATE TAILORED RESUME"}
         </span>
         <span className="nav-fill" />
       </button>

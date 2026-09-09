@@ -3,25 +3,24 @@ import { ArrowRight } from "lucide-react";
 
 import { Footer } from "@/components/Footer";
 import { Nav } from "@/components/Nav";
+import { seo } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Kareer Guide — AI Job Search & Career Roadmaps in India" },
-      {
-        name: "description",
-        content:
-          "Upload your resume and get matched to live jobs and internships, tailor your resume to any job description, and follow an AI career roadmap. Built for India.",
-      },
-      { property: "og:title", content: "Kareer Guide — AI Job Search & Career Roadmaps" },
-      {
-        property: "og:description",
-        content: "AI job matching, resume tailoring and career roadmaps for students and professionals.",
-      },
-      { property: "og:url", content: "/" },
-    ],
-    links: [{ rel: "canonical", href: "/" }],
-  }),
+  head: () =>
+    seo({
+      title: "Kareer Guide — AI Job Search & Career Roadmaps in India",
+      description:
+        "Upload your resume and get matched to live jobs and internships, tailor your resume to any job description, and follow an AI career roadmap. Built for India.",
+      path: "/",
+      keywords: [
+        "ai job search india",
+        "resume job match",
+        "internships india",
+        "career roadmap",
+        "ats resume checker",
+      ],
+      bareTitle: true,
+    }),
   component: Home,
 });
 
@@ -73,7 +72,10 @@ function Home() {
 
         <div className="mt-16 grid gap-px border border-border bg-border md:grid-cols-3">
           {[
-            ["13+ JOB SOURCES", "LinkedIn, Internshala, Indeed, Adzuna, Remotive and more, merged and de-duplicated."],
+            [
+              "13 JOB SOURCES",
+              "LinkedIn, Internshala, Indeed, Adzuna, Remotive, WeWorkRemotely and more, merged and de-duplicated.",
+            ],
             ["FRESH ONLY", "Postings older than 10 days are filtered out, newest first."],
             ["NO SIGN-UP", "No accounts, no passwords. Everything stays on your device."],
           ].map(([h, p]) => (

@@ -5,24 +5,24 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { Page } from "@/components/Page";
+import { seo } from "@/lib/seo";
 import { generateRoadmap } from "@/lib/jobsy.functions";
 import type { RoadmapPhase } from "@/lib/types";
 
 export const Route = createFileRoute("/roadmap")({
-  head: () => ({
-    meta: [
-      { title: "Career Roadmap Generator | Kareer Guide" },
-      {
-        name: "description",
-        content:
-          "Enter a target role and get a free 6-8 phase career roadmap with skills, free resources, projects and milestones. Download it as a PDF.",
-      },
-      { property: "og:title", content: "Career Roadmap Generator | Kareer Guide" },
-      { property: "og:description", content: "An AI step-by-step path to your target role." },
-      { property: "og:url", content: "/roadmap" },
-    ],
-    links: [{ rel: "canonical", href: "/roadmap" }],
-  }),
+  head: () =>
+    seo({
+      title: "Career Roadmap Generator",
+      description:
+        "Enter a target role and get a free 6-8 phase career roadmap with skills, free resources, projects and milestones. Download it as a PDF.",
+      path: "/roadmap",
+      keywords: [
+        "career roadmap generator",
+        "learning path",
+        "free learning resources",
+        "how to become a data analyst",
+      ],
+    }),
   component: RoadmapPage,
 });
 
@@ -34,7 +34,10 @@ function RoadmapPage() {
   const [busy, setBusy] = useState(false);
 
   async function submit() {
-    if (role.trim().length < 2) return toast.error("Enter a target role");
+    if (role.trim().length < 2) {
+      toast.error("Enter a target role");
+      return;
+    }
     setBusy(true);
     try {
       const { phases } = await run({ data: { role, background } });
@@ -97,7 +100,11 @@ function RoadmapPage() {
           value={background}
           onChange={(e) => setBackground(e.target.value)}
         />
-        <button disabled={busy} className="btn-brutal mt-6 w-full disabled:opacity-60" onClick={submit}>
+        <button
+          disabled={busy}
+          className="btn-brutal mt-6 w-full disabled:opacity-60"
+          onClick={submit}
+        >
           <span className="relative z-10 flex items-center gap-2">
             {busy && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
             {busy ? "BUILDING YOUR ROADMAP…" : "GENERATE ROADMAP"}

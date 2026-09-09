@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as JobsRouteImport } from './routes/jobs'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as RecommendationsRouteImport } from './routes/recommendations'
 import { Route as ResumeAnalysisRouteImport } from './routes/resume-analysis'
 import { Route as RoadmapRouteImport } from './routes/roadmap'
@@ -26,6 +27,11 @@ const IndexRoute = IndexRouteImport.update({
 const JobsRoute = JobsRouteImport.update({
   id: '/jobs',
   path: '/jobs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RecommendationsRoute = RecommendationsRouteImport.update({
@@ -62,6 +68,7 @@ const TailoredResumeRoute = TailoredResumeRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/jobs': typeof JobsRoute
+  '/mcp': typeof McpRoute
   '/recommendations': typeof RecommendationsRoute
   '/resume-analysis': typeof ResumeAnalysisRoute
   '/roadmap': typeof RoadmapRoute
@@ -72,6 +79,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/jobs': typeof JobsRoute
+  '/mcp': typeof McpRoute
   '/recommendations': typeof RecommendationsRoute
   '/resume-analysis': typeof ResumeAnalysisRoute
   '/roadmap': typeof RoadmapRoute
@@ -83,6 +91,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/jobs': typeof JobsRoute
+  '/mcp': typeof McpRoute
   '/recommendations': typeof RecommendationsRoute
   '/resume-analysis': typeof ResumeAnalysisRoute
   '/roadmap': typeof RoadmapRoute
@@ -95,6 +104,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/jobs'
+    | '/mcp'
     | '/recommendations'
     | '/resume-analysis'
     | '/roadmap'
@@ -105,6 +115,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/jobs'
+    | '/mcp'
     | '/recommendations'
     | '/resume-analysis'
     | '/roadmap'
@@ -115,6 +126,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/jobs'
+    | '/mcp'
     | '/recommendations'
     | '/resume-analysis'
     | '/roadmap'
@@ -126,6 +138,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   JobsRoute: typeof JobsRoute
+  McpRoute: typeof McpRoute
   RecommendationsRoute: typeof RecommendationsRoute
   ResumeAnalysisRoute: typeof ResumeAnalysisRoute
   RoadmapRoute: typeof RoadmapRoute
@@ -148,6 +161,13 @@ declare module '@tanstack/react-router' {
       path: '/jobs'
       fullPath: '/jobs'
       preLoaderRoute: typeof JobsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/recommendations': {
@@ -198,6 +218,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   JobsRoute: JobsRoute,
+  McpRoute: McpRoute,
   RecommendationsRoute: RecommendationsRoute,
   ResumeAnalysisRoute: ResumeAnalysisRoute,
   RoadmapRoute: RoadmapRoute,
