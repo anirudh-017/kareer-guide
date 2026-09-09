@@ -3,12 +3,48 @@ import type { Job } from "./types";
 
 // Adzuna answers in ~6.3s and supplies most of the results, so an 8s budget
 // dropped it whenever the other twelve sources loaded the event loop.
-const TIMEOUT = 15000;
+/**
+ * Per-source budget. Sources run in parallel, so the search takes as long as
+ * its slowest survivor — 3500ms met a four-second target but cut RemoteOK,
+ * which answers just over it. Raised to keep that source.
+ */
+const TIMEOUT = 6000;
 
-function withTimeout<T>(p: Promise<T>, fallback: T): Promise<T> {
+/**
+ * JSearch's own budget. A cache hit returns instantly; a miss cannot beat its
+ * 5.4s floor regardless, so waiting the full TIMEOUT for it only delays the
+ * page. Cut it early and let it keep running to warm the cache.
+ */
+const JSEARCH_BUDGET = 1200;
+
+/** Never return fewer than this if the fetched set can supply them. */
+const MIN_RESULTS = 20;
+
+/**
+ * JSearch answers in 5.4s at its fastest and a median of 53s, so it can never
+ * be awaited inside the budget. It is fetched anyway: withTimeout races the
+ * promise but does not cancel it, so the call keeps running after the page has
+ * been sent and writes its result here. The next search for the same terms
+ * gets those jobs instantly — and spends none of the 200-a-month quota.
+ */
+const JSEARCH_TTL = 30 * 60_000;
+const jsearchCache = new Map<string, { jobs: Job[]; at: number }>();
+
+function withTimeout<T>(p: Promise<T>, fallback: T, name?: string, budget = TIMEOUT): Promise<T> {
+  let timer: ReturnType<typeof setTimeout>;
   return Promise.race([
-    p,
-    new Promise<T>((resolve) => setTimeout(() => resolve(fallback), TIMEOUT)),
+    p.then((value) => {
+      clearTimeout(timer);
+      return value;
+    }),
+    new Promise<T>((resolve) => {
+      timer = setTimeout(() => {
+        // A silent [] here looked identical to a source with no matches, which
+        // is why a timing out source could not be told from an empty one.
+        console.warn(`[jobs] source ${name ?? "?"} timed out after ${budget}ms and was skipped`);
+        resolve(fallback);
+      }, budget);
+    }),
   ]);
 }
 
@@ -25,9 +61,9 @@ function isPermanent(error: unknown): boolean {
   return /-> (401|403|404)\b/.test(msg) || /not subscribed|does not exist/i.test(msg);
 }
 
-async function wrap(name: string, p: Promise<Job[]>): Promise<Job[]> {
+async function wrap(name: string, p: Promise<Job[]>, budget = TIMEOUT): Promise<Job[]> {
   try {
-    return await withTimeout(p, []);
+    return await withTimeout(p, [], name, budget);
   } catch (error) {
     if (isPermanent(error)) {
       if (!permanentFailures.has(name)) {
@@ -95,16 +131,34 @@ type Any = any;
 
 /* ------------------------------ sources ------------------------------ */
 
-async function jsearch(query: string, location: string): Promise<Job[]> {
+async function jsearch(query: string, country: string): Promise<Job[]> {
+  const cacheKey = `${query}|${country}`;
+  const hit = jsearchCache.get(cacheKey);
+  if (hit && Date.now() - hit.at < JSEARCH_TTL) return hit.jobs;
+  const jobs = await fetchJsearch(query, country);
+  if (jobs.length) jsearchCache.set(cacheKey, { jobs, at: Date.now() });
+  return jobs;
+}
+
+async function fetchJsearch(query: string, country: string): Promise<Job[]> {
   const key = env("RAPIDAPI_KEY");
   if (!key) return [];
-  const q = encodeURIComponent(`${query} ${location}`.trim());
+  // Skills only. Appending the location to the query strangles this source —
+  // measured on one key, one minute apart:
+  //   "react Bengaluru, India" country=in →  3 jobs
+  //   "react Bengaluru"        country=in →  6
+  //   "react"                  country=in → 10
+  //   "react Berlin, Germany"  country=de →  0
+  //   "react"                  country=de → 10
+  // country already scopes the search; city relevance is the ranker's job,
+  // and it can only rank rows the API actually returned.
+  const q = encodeURIComponent(query.trim());
   // JSearch v5 renamed /search to /search-v2 (the old path now 404s) and moved
   // the job array from `data` down to `data.jobs`. Field names are unchanged.
   // num_pages stays at 1: page 2 pushes the response past 25s — well beyond
   // TIMEOUT — for the same jobs, so asking for it silently drops the source.
   const data = (await getJson(
-    `https://jsearch.p.rapidapi.com/search-v2?query=${q}&num_pages=1&date_posted=all`,
+    `https://jsearch.p.rapidapi.com/search-v2?query=${q}&num_pages=1&date_posted=all&country=${country}`,
     { headers: { "X-RapidAPI-Key": key, "X-RapidAPI-Host": "jsearch.p.rapidapi.com" } },
   )) as Any;
   return (data.data?.jobs ?? []).slice(0, 30).map((j: Any): Job => ({
@@ -115,6 +169,7 @@ async function jsearch(query: string, location: string): Promise<Job[]> {
     description: clean(j.job_description),
     applyLink: j.job_apply_link ?? "",
     source: j.job_publisher ?? "JSearch",
+    via: "jsearch" as const,
     postedAt: j.job_posted_at_datetime_utc ?? null,
     jobType: (j.job_employment_type ?? "").toLowerCase(),
   }));
@@ -468,6 +523,11 @@ const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9+#. ]/g, " ");
 
 const REMOTE = /\b(remote|anywhere|worldwide|distributed|work from home|wfh)\b/;
 
+/** Remote per the listing's own location or employment type. */
+export function isRemote(job: Job): boolean {
+  return REMOTE.test(norm(job.location)) || REMOTE.test(norm(job.jobType));
+}
+
 /**
  * Words worth matching a job's location against — "Bengaluru, India" gives
  * ["bengaluru", "india"]. Two-letter fragments are dropped so a stray "in"
@@ -571,7 +631,7 @@ export async function aggregateJobs(opts: JobSearchOptions): Promise<Job[]> {
         : primary;
 
   const batches = await Promise.all([
-    wrap("jsearch", jsearch(query, location)),
+    wrap("jsearch", jsearch(query, country), JSEARCH_BUDGET),
     wrap("adzuna", adzuna(query, country, intern)),
     wrap("remotive", remotive(primary)),
     wrap("arbeitnow", arbeitnow()),
@@ -587,20 +647,71 @@ export async function aggregateJobs(opts: JobSearchOptions): Promise<Job[]> {
   ]);
 
   const tokens = locationTokens(location);
-  const all = dedupe(batches.flat());
-  const scored = all
-    .map((job) => ({ job, score: scoreJob(job, skills, tokens, country) }))
-    .filter((x) => x.score > 0 && recent(x.job))
-    .sort((a, b) => b.score - a.score);
+  const fetched = batches.flat();
+  const all = dedupe(fetched);
+  const ranked = all.map((job) => ({ job, score: scoreJob(job, skills, tokens, country) }));
+  const withScore = ranked.filter((x) => x.score > 0);
+  const fresh = withScore.filter((x) => recent(x.job));
+  // Freshness is a preference, not a gate: showing nothing is worse than
+  // showing a three-week-old posting the user can judge for themselves.
+  const scored = (fresh.length >= MIN_RESULTS ? fresh : withScore).sort(
+    (a, b) => b.score - a.score,
+  );
+
+  if (env("JOBS_DEBUG")) {
+    const perSource: Record<string, number> = {};
+    for (const job of fetched) perSource[job.source] = (perSource[job.source] ?? 0) + 1;
+    console.warn(
+      `[jobs] ${JSON.stringify({ query, location, country })}` +
+        `
+  fetched   ${fetched.length} ${JSON.stringify(perSource)}` +
+        `
+  deduped   ${all.length}` +
+        `
+  scored>0  ${withScore.length}  (dropped ${all.length - withScore.length} on skills)` +
+        `
+  recent    ${scored.length}  (dropped ${withScore.length - scored.length} as stale)` +
+        `
+  of the skills drops: ${ranked.filter((x) => x.score === 0 && !x.job.description).length} had no description text to match`,
+    );
+  }
 
   const max = scored[0]?.score ?? 0;
   const pick = (ratio: number) => scored.filter((x) => x.score >= max * ratio).map((x) => x.job);
 
   let result = pick(0.5);
-  if (result.length < 5) result = pick(0.3);
-  if (result.length < 5) result = scored.slice(0, 30).map((x) => x.job);
+  if (result.length < MIN_RESULTS) result = pick(0.3);
 
+  // JSearch rows are asked to lead the list, so the score-ratio cut above must
+  // not be what removes them: they score on body matches rather than title
+  // hits, which put them under the threshold and dropped all ten of them.
+  const fromJSearch = scored.filter((x) => x.job.via === "jsearch").map((x) => x.job);
+  if (fromJSearch.length) {
+    const kept = new Set(result);
+    result = fromJSearch.concat(
+      result.filter((job) => !fromJSearch.includes(job) && kept.has(job)),
+    );
+  }
+  if (result.length < MIN_RESULTS) result = scored.map((x) => x.job);
+  if (result.length < MIN_RESULTS) {
+    // Still short: top up from everything fetched rather than under-fill the
+    // page. These scored zero on skills, so they go last and stay last.
+    const seen = new Set(result);
+    result = result.concat(
+      all.filter((job) => !seen.has(job)).slice(0, MIN_RESULTS - result.length),
+    );
+  }
+
+  const newest = (job: Job) => Date.parse(job.postedAt ?? "0") || 0;
+  // Requested order: JSearch first, then remote, then newest. The first two
+  // were asked for separately and cannot both be strictly first, so they are
+  // applied in that priority rather than one silently overriding the other.
   return result
-    .sort((a, b) => (Date.parse(b.postedAt ?? "0") || 0) - (Date.parse(a.postedAt ?? "0") || 0))
+    .sort(
+      (a, b) =>
+        Number(b.via === "jsearch") - Number(a.via === "jsearch") ||
+        Number(isRemote(b)) - Number(isRemote(a)) ||
+        newest(b) - newest(a),
+    )
     .slice(0, 120);
 }

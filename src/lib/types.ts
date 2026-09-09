@@ -7,6 +7,11 @@ export type Job = {
   source: string;
   postedAt: string | null;
   jobType: string;
+  /**
+   * Which upstream fetched it. Only JSearch is tagged, because it is the one
+   * source the ranking is asked to float to the top.
+   */
+  via?: "jsearch";
 };
 
 export type SavedJob = Job & {
