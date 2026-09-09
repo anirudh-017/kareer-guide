@@ -6,6 +6,7 @@
  * (external agents) — so the two can never drift apart.
  */
 import { ai, aiGroq, parseJson } from "./ai.server";
+import { InvalidInputError, assertMeaningful } from "./validate";
 import { aggregateJobs, type JobSearchOptions } from "./jobs.server";
 import type { Job, ResumeAnalysis, Roadmap, RoadmapPhase, RoadmapResource } from "./types";
 
@@ -89,12 +90,19 @@ function toPhase(raw: unknown, index: number): RoadmapPhase {
  * single milestone that proves the phase is done. Runs on Groq.
  */
 export async function buildRoadmap(role: string, background?: string): Promise<Roadmap> {
+  assertMeaningful(role, "role");
   const text = await aiGroq(
-    `Create a complete, professional learning roadmap for someone who wants to become a "${role}".
+    `FIRST, decide whether "${role}" names a real job, profession or field of work.
+If it does not — it is keyboard mash, a random string, or otherwise meaningless —
+return ONLY {"recognized": false} and nothing else. Never substitute a role you
+think the person meant, and never invent a plausible-sounding one.
+
+If it does, set "recognized": true and create a complete, professional learning roadmap for someone who wants to become a "${role}".
 ${background ? `Tailor it to this person's starting point: ${background}` : "Assume a motivated beginner with no professional experience in this field."}
 
 Return ONLY JSON with this exact shape:
 {
+ "recognized": true,
  "overview": "3-4 sentences: what this role actually does day to day, which industries hire for it, and realistic salary expectations. Concrete, not motivational filler.",
  "totalDuration": "e.g. 6-9 Months",
  "prerequisites": [2-4 things someone should already have before starting],
@@ -120,6 +128,15 @@ RULES
   );
 
   const parsed = parseJson<Record<string, unknown>>(text, {});
+
+  // The model was asked to judge the role before writing anything. An empty
+  // roadmap would reach the UI as "something went wrong"; this says why.
+  if (parsed["recognized"] === false) {
+    throw new InvalidInputError(
+      `"${role}" doesn't look like a real role. Try a job title like "Data Scientist" or "Frontend Developer".`,
+    );
+  }
+
   const phases = Array.isArray(parsed["phases"])
     ? (parsed["phases"] as unknown[]).slice(0, 8).map(toPhase)
     : [];

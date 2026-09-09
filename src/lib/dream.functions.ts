@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { rateLimit } from "./rate-limit.server";
+import { looksLikeGibberish } from "./validate";
 import {
   extractProfileFromResume,
   extractRequirements,
@@ -40,8 +41,22 @@ const ProfileSchema = z.object({
 });
 
 const DreamInputSchema = z.object({
-  company: z.string().max(80).default(""),
-  role: z.string().min(2).max(80),
+  company: z
+    .string()
+    .max(80)
+    .default("")
+    .refine((v) => !v || !looksLikeGibberish(v), {
+      message:
+        "That doesn't look like a real company. Leave it blank to compare against the field.",
+    }),
+  role: z
+    .string()
+    .min(2)
+    .max(80)
+    // Shape was already checked here; meaning was not, so mash reached the model.
+    .refine((v) => !looksLikeGibberish(v), {
+      message: "That doesn't look like a real role. Try a job title like “Data Scientist”.",
+    }),
   profile: ProfileSchema,
   skills: z.array(RatedSkillSchema).min(1).max(60),
   resumeText: z.string().max(30_000).optional(),
