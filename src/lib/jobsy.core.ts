@@ -92,12 +92,13 @@ function toPhase(raw: unknown, index: number): RoadmapPhase {
 export async function buildRoadmap(role: string, background?: string): Promise<Roadmap> {
   assertMeaningful(role, "role");
   const text = await aiGroq(
-    `FIRST, decide whether "${role}" names a real job, profession or field of work.
-If it does not — it is keyboard mash, a random string, or otherwise meaningless —
-return ONLY {"recognized": false} and nothing else. Never substitute a role you
-think the person meant, and never invent a plausible-sounding one.
+    `Create a complete, professional learning roadmap for someone who wants to become a "${role}".
 
-If it does, set "recognized": true and create a complete, professional learning roadmap for someone who wants to become a "${role}".
+Judge the role first. If "${role}" does not name a real job, profession or field
+of work — keyboard mash, a random string, or otherwise meaningless — set
+"recognized" to false and leave "phases" empty. Never substitute a role you think
+the person meant, and never invent a plausible-sounding one. Otherwise set
+"recognized" to true and fill in everything below.
 ${background ? `Tailor it to this person's starting point: ${background}` : "Assume a motivated beginner with no professional experience in this field."}
 
 Return ONLY JSON with this exact shape:
