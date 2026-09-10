@@ -1,5 +1,6 @@
 import { ai, aiShort, parseJson } from "../ai.server";
 import { aggregateJobs } from "../jobs.server";
+import { InvalidInputError } from "../validate";
 import { findCompany } from "./companies";
 import type {
   DreamAnalysis,
@@ -382,8 +383,22 @@ RULES
   specific stack, then interview preparation. Say plainly that they are starting from scratch
   and give an honest, longer timeline rather than a flattering short one.
 
+PROFILE CHECK
+- Go through the USER PROFILE one field at a time — level, degree, branch, college, jobTitle,
+  internships, projects — and ask of each: is this value a real word, name or abbreviation
+  that a person could mean? Put every field that fails in "unreadableFields".
+- A value fails when it is random letters or keyboard mash: "ilugb" is not a degree,
+  "asdkjh" is not a branch, "qwerty college" is not an institution. Check every field
+  independently; one bad field does not excuse the others, and one good field does not
+  vouch for them.
+- Judge only what is written; never guess what was meant, and never repair a value silently.
+- Be conservative in the other direction. Real institutions, abbreviations and place names
+  look unfamiliar all the time ("BITS", "VIT", "Bhilai", "TRR College of Technology") and
+  must be accepted. An empty field is fine and is never flagged.
+
 Return ONLY JSON:
 {
+ "unreadableFields": [],  // names from: level, degree, branch, college, jobTitle, internships, projects
  "match": { "strengths": [3-6 strings from the user's existing skills/experience],
             "explanation": "3-4 plain sentences: where they stand, biggest gaps, what to do first" },
  "skillLevels": {}, // your estimate of the user's level for each required/preferred skill: map skill->"none"|"beginner"|"intermediate"|"advanced"|"expert"
@@ -401,7 +416,9 @@ Return ONLY JSON:
     "You are an honest, encouraging career coach. Reply with JSON only.",
   );
 
-  const parsed = parseJson<CoachingPack & { skillLevels?: Record<string, string> }>(text, {
+  const parsed = parseJson<
+    CoachingPack & { skillLevels?: Record<string, string>; unreadableFields?: unknown }
+  >(text, {
     aiSkillLevels: {},
     match: {
       match: 0,
@@ -418,6 +435,19 @@ Return ONLY JSON:
     readiness: [],
     overallReadiness: 0,
   });
+
+  // The profile's free-text fields cannot be pattern-checked without rejecting
+  // real institutions, so the model judges them here. Refuse rather than build
+  // a confident gap analysis on top of a value nobody can read.
+  const unreadable = Array.isArray(parsed.unreadableFields)
+    ? parsed.unreadableFields.filter((f): f is string => typeof f === "string" && !!f.trim())
+    : [];
+  if (unreadable.length) {
+    const names = unreadable.slice(0, 4).join(", ");
+    throw new InvalidInputError(
+      `Some profile fields don't look like real values: ${names}. Fix those and run the analysis again.`,
+    );
+  }
 
   return {
     // match/match.category/eligible are recomputed client-side from the real

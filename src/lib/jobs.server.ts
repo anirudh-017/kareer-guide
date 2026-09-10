@@ -9,7 +9,7 @@ import type { Job } from "./types";
  * its slowest survivor — 3500ms met a four-second target but cut RemoteOK,
  * which answers just over it. Raised to keep that source.
  */
-const TIMEOUT = 6000;
+const TIMEOUT = 9000;
 
 /**
  * JSearch's own budget. A cache hit returns instantly; a miss cannot beat its
@@ -20,6 +20,9 @@ const JSEARCH_BUDGET = 1200;
 
 /** Never return fewer than this if the fetched set can supply them. */
 const MIN_RESULTS = 20;
+
+/** Places held for every source that matched, so one strong board cannot crowd out the rest. */
+const SOURCE_SLOTS = 8;
 
 /**
  * JSearch answers in 5.4s at its fastest and a median of 53s, so it can never
@@ -230,7 +233,7 @@ async function remotive(query: string): Promise<Job[]> {
     title: j.title ?? "",
     company: j.company_name ?? "",
     location: j.candidate_required_location || "Remote",
-    description: clean(j.description),
+    description: clean([j.description, (j.tags ?? []).join(" ")].join(" ")),
     applyLink: j.url ?? "",
     source: "Remotive",
     postedAt: j.publication_date ?? null,
@@ -244,7 +247,7 @@ async function arbeitnow(): Promise<Job[]> {
     title: j.title ?? "",
     company: j.company_name ?? "",
     location: j.location || (j.remote ? "Remote" : ""),
-    description: clean(j.description),
+    description: clean([j.description, (j.tags ?? []).join(" ")].join(" ")),
     applyLink: j.url ?? "",
     source: "Arbeitnow",
     postedAt: j.created_at ? new Date(j.created_at * 1000).toISOString() : null,
@@ -258,7 +261,7 @@ async function jobicy(): Promise<Job[]> {
     title: j.jobTitle ?? "",
     company: j.companyName ?? "",
     location: j.jobGeo || "Remote",
-    description: clean(j.jobExcerpt ?? j.jobDescription),
+    description: clean([j.jobExcerpt, j.jobDescription, (j.jobIndustry ?? []).join(" ")].join(" ")),
     applyLink: j.url ?? "",
     source: "Jobicy",
     postedAt: j.pubDate ? new Date(j.pubDate).toISOString() : null,
@@ -278,7 +281,7 @@ async function remoteok(): Promise<Job[]> {
     title: j.position ?? j.title ?? "",
     company: j.company ?? "",
     location: j.location || "Remote",
-    description: clean(j.description),
+    description: clean([j.description, (j.tags ?? []).join(" ")].join(" ")),
     applyLink: j.url ?? j.apply_url ?? "",
     source: "RemoteOK",
     postedAt: j.date ?? null,
@@ -580,8 +583,11 @@ export function scoreJob(job: Job, skills: string[], tokens: string[], country: 
       matches++;
     }
   }
-  // Skills remain the gate: a perfect location never rescues an unrelated role.
-  if (!titleHit && matches < 2) return 0;
+  // One mention anywhere is enough to keep a job; ranking sorts out how good
+  // it is. Demanding a title hit or two body mentions wiped out the remote
+  // boards, which are unfiltered feeds that rarely name a skill in the title.
+  if (matches < 1) return 0;
+  // A title hit still outranks a passing mention, so relevance order holds.
   return score + locationScore(job, tokens, country);
 }
 
@@ -671,7 +677,16 @@ export async function aggregateJobs(opts: JobSearchOptions): Promise<Job[]> {
         `
   recent    ${scored.length}  (dropped ${withScore.length - scored.length} as stale)` +
         `
-  of the skills drops: ${ranked.filter((x) => x.score === 0 && !x.job.description).length} had no description text to match`,
+  of the skills drops: ${ranked.filter((x) => x.score === 0 && !x.job.description).length} had no description text to match` +
+        `
+  survived by source ${JSON.stringify(
+    withScore.reduce<Record<string, number>>((a2, x) => {
+      a2[x.job.source] = (a2[x.job.source] ?? 0) + 1;
+      return a2;
+    }, {}),
+  )}` +
+        `
+  of those, remote ${withScore.filter((x) => isRemote(x.job)).length}`,
     );
   }
 
@@ -684,6 +699,24 @@ export async function aggregateJobs(opts: JobSearchOptions): Promise<Job[]> {
   // JSearch rows are asked to lead the list, so the score-ratio cut above must
   // not be what removes them: they score on body matches rather than title
   // hits, which put them under the threshold and dropped all ten of them.
+  // The score ratio silently collapsed the result to one or two boards. A local
+  // listing scores a title hit plus a full location match (18) while a remote
+  // board can only reach a skill mention plus the remote allowance (9), so half
+  // of 18 put every other source on or under the line. Measured on one search:
+  // seven sources survived scoring, two reached the page.
+  //
+  // Give each source that found something a guaranteed share, best-scoring
+  // first, so breadth survives a strong local match.
+  const perSource = new Map<string, Job[]>();
+  for (const { job } of scored) {
+    const held = perSource.get(job.source) ?? [];
+    if (held.length < SOURCE_SLOTS) {
+      held.push(job);
+      perSource.set(job.source, held);
+    }
+  }
+  const reserved = [...perSource.values()].flat();
+
   const fromJSearch = scored.filter((x) => x.job.via === "jsearch").map((x) => x.job);
   if (fromJSearch.length) {
     const kept = new Set(result);
@@ -699,6 +732,11 @@ export async function aggregateJobs(opts: JobSearchOptions): Promise<Job[]> {
     result = result.concat(
       all.filter((job) => !seen.has(job)).slice(0, MIN_RESULTS - result.length),
     );
+  }
+
+  if (reserved.length) {
+    const have = new Set(result);
+    result = result.concat(reserved.filter((job) => !have.has(job)));
   }
 
   const newest = (job: Job) => Date.parse(job.postedAt ?? "0") || 0;

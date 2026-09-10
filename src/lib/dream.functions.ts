@@ -23,14 +23,45 @@ const RatedSkillSchema = z.object({
   rating: z.enum(["beginner", "intermediate", "advanced", "expert"]),
 });
 
+/**
+ * Only the two fields with an unambiguous shape are checked here. A degree,
+ * branch or college cannot be validated by pattern without rejecting real
+ * ones — "Bhilai" and "ilugb" are indistinguishable to a regex — so those are
+ * judged by the model in generateCoaching instead.
+ */
+const YEAR = new Date().getFullYear();
+const gradYear = z
+  .string()
+  .max(10)
+  .default("")
+  .refine((v) => !v.trim() || /^(19|20)\d{2}$/.test(v.trim()), {
+    message: "Graduation year should be a four-digit year, e.g. 2027.",
+  })
+  .refine(
+    (v) => {
+      const n = Number(v.trim());
+      return !v.trim() || (n >= 1950 && n <= YEAR + 10);
+    },
+    { message: `Graduation year should be between 1950 and ${YEAR + 10}.` },
+  );
+
+const gpa = z
+  .string()
+  .max(20)
+  .default("")
+  // Accepts 8.4, 8.4/10, 3.6/4, 84%, 84 — the forms Indian and US transcripts use.
+  .refine((v) => !v.trim() || /^\d{1,3}(\.\d{1,2})?\s*(%|\/\s*(4|5|7|10))?$/.test(v.trim()), {
+    message: "GPA should be a number, e.g. 8.4, 8.4/10 or 84%.",
+  });
+
 const ProfileSchema = z.object({
   education: z.object({
     level: z.string().max(80).default(""),
     degree: z.string().max(120).default(""),
     branch: z.string().max(120).default(""),
     college: z.string().max(160).default(""),
-    graduationYear: z.string().max(10).default(""),
-    gpa: z.string().max(20).default(""),
+    graduationYear: gradYear,
+    gpa,
   }),
   experience: z.object({
     level: z.string().max(40).default(""),
