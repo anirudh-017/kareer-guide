@@ -127,3 +127,14 @@ describe("matchesLocation with a detected location", () => {
     expect(matchesLocation("Bangalore, Karnataka", filter)).toBe(false);
   });
 });
+
+describe("remote detection is shared with the server ranking", () => {
+  // The client copy of this pattern used to omit three spellings, so a WFH role
+  // was floated to the top of the results and then hidden by the location filter.
+  it.each(["Remote", "Work From Home", "WFH", "Distributed", "Anywhere in the World", "Worldwide"])(
+    "keeps %s against any location filter",
+    (jobLocation) => {
+      expect(matchesLocation(jobLocation, "Bengaluru, India")).toBe(true);
+    },
+  );
+});

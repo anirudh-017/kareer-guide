@@ -30,7 +30,13 @@ export function typeOf(job: Job): string {
   return "full-time";
 }
 
-const REMOTE = /\b(remote|anywhere|worldwide)\b/;
+/**
+ * How every layer decides a listing is remote. Shared with jobs.server so
+ * the two cannot drift: the client copy used to omit "distributed", "work
+ * from home" and "wfh", so a WFH role was promoted to the top of the results
+ * by the ranking and then hidden by the location filter.
+ */
+export const REMOTE = /\b(remote|anywhere|worldwide|distributed|work from home|wfh)\b/;
 
 /**
  * Match a job's location against what the user typed, token by token.

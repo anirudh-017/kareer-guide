@@ -1,4 +1,5 @@
 import { DEFAULT_COUNTRY, countryCodeFor } from "./countries";
+import { REMOTE } from "./jobFilters";
 import type { Job } from "./types";
 
 // Adzuna answers in ~6.3s and supplies most of the results, so an 8s budget
@@ -520,8 +521,6 @@ async function firecrawl(query: string, location: string): Promise<Job[]> {
 /* --------------------------- ranking pipeline --------------------------- */
 
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9+#. ]/g, " ");
-
-const REMOTE = /\b(remote|anywhere|worldwide|distributed|work from home|wfh)\b/;
 
 /** Remote per the listing's own location or employment type. */
 export function isRemote(job: Job): boolean {
